@@ -65,7 +65,7 @@ services:
     image: nextcloud/all-in-one:latest
     container_name: nextcloud-aio-mastercontainer
     restart: unless-stopped
-    network_mode: bridge
+    network_mode: host
     environment:
       - APACHE_PORT=11000
       - APACHE_IP_BINDING=0.0.0.0
