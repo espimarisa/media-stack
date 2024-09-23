@@ -30,19 +30,6 @@ services:
       - 443:443
       - 81:81
 
-  # PostgreSQL
-  postgres:
-    image: bitnami/postgresql:13
-    container_name: nextcloud-postgresql
-    restart: unless-stopped
-    networks: [globalNetwork]
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGESQL_DATABASE=${POSTGRES_DB}
-    volumes:
-      - postgresql:/bitnami/postgresql
-
   # Redis
   redis:
     container_name: redis
@@ -78,7 +65,7 @@ services:
     image: nextcloud/all-in-one:latest
     container_name: nextcloud-aio-mastercontainer
     restart: unless-stopped
-    networks: [globalNetwork]
+    network_mode: bridge
     depends_on: [postgres]
     environment:
       - APACHE_PORT=11000
