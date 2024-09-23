@@ -73,10 +73,10 @@ services:
     volumes:
       - searxng:/etc/searxng
 
-  # NextCloud
-  nextcloud:
+  # NextCloud AIO
+  nextcloud-aio-mastercontainer:
     image: nextcloud/all-in-one:latest
-    container_name: nextcloud
+    container_name: nextcloud-aio-mastercontainer
     restart: unless-stopped
     networks: [globalNetwork]
     depends_on: [postgres]
