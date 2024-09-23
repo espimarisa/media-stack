@@ -69,34 +69,35 @@ services:
     environment:
       - SEARXNG_BASEURL=${SEARXNG_BASEURL}
     ports:
-      - 8080:8080
+      - ${SEARXNG_PORT}:${SEARXNG_PORT}
     volumes:
       - searxng:/etc/searxng
 
   # NextCloud
   nextcloud:
-    image: lscr.io/linuxserver/nextcloud:latest
+    image: nextcloud/all-in-one:latest
     container_name: nextcloud
     restart: unless-stopped
     networks: [globalNetwork]
     depends_on: [nextcloud-redis, postgres]
     environment:
+      - APACHE_PORT=${NEXTCLOUD_PORT}
+      - APACHE_IP_BINDING=127.0.0.1
       - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS}
       - REDIS_HOST=nextcloud-redis
+      - NEXTCLOUD_DATADIR=${NEXTCLOUD_DATADIR}
+      - NEXTCLOUD_UPLOAD_LIMIT=100G
+      - NEXTCLOUD_MAX_TIME=12000
+      - NEXTCLOUD_MEMORY_LIMIT=8096M # Memory limit, lower if a problem
+      - NEXTCLOUD_ENABLE_DRI_DEVICE=true # Disable if /dev/dri doesn't exist
+      - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS}
     volumes:
-        - nextcloud:/config
+        - nextcloud:/mnt/docker-aio-config
         - ${STORAGE_DIRECTORY}/nextcloud:/data
+        - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-        - 6969:6969
-
-  # NextCloud redis instance
-  nextcloud-redis:
-    image: bitnami/redis:latest
-    restart: unless-stopped
-    container_name: nextcloud-redis
-    networks: [globalNetwork]
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
+        - ${NEXTCLOUD_PORT}:${NEXTCLOUD_PORT}
+        - 8443:8443
 
   # Cloudflare-ddns
   cloudflare-ddns:
@@ -121,7 +122,7 @@ services:
     volumes:
       - homepage:/app/config # Homepage config
     ports:
-      - 3000:3000 # Homepage WebUI port
+      - ${HOMEPAGE_PORT}:${HOMEPAGE_PORT} # Homepage WebUI port
 
   # qBittorrent
   qbittorrentvpn:
@@ -149,8 +150,8 @@ services:
       - ${STORAGE_DIRECTORY}:/storage
       - /lib/modules:/lib/modules
     ports:
-      - 8088:8088 # qBittorrent WebUI Port
-      - 8118:8118 # Privoxy Port
+      - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT} # qBittorrent WebUI Port
+      - ${PRIVOXY_PORT}:${PRIV} # Privoxy Port
 
   # Radarr
   radarr:
@@ -168,7 +169,7 @@ services:
       - radarr:/config
       - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
     ports:
-      - 7878:7878 # Radarr WebUI port
+      - ${RADARR_PORT}:${RADARR_PORT} # Radarr WebUI port
 
   # Sonarr
   sonarr:
@@ -186,7 +187,7 @@ services:
       - sonarr:/config
       - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
     ports:
-      - 8989:8989 # Sonarr WebUI port
+      - ${SONARR_PORT}:${SONARR_PORT} # Sonarr WebUI port
 
   # Readarr
   readarr:
@@ -204,7 +205,7 @@ services:
       - readarr:/config
       - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
     ports:
-      - 8787:8787 # Readarr WebUI port
+      - ${READARR_PORT}:${READARR_PORT} # Readarr WebUI port
 
   # Prowlarr
   prowlarr:
@@ -222,7 +223,7 @@ services:
       - prowlarr:/config
       - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
     ports:
-      - 9696:9696 # Prowlarr WebUI port
+      - ${PROWLARR_PORT}:${PROWLARR_PORT} # Prowlarr WebUI port
 
   # Recyclarr
   recyclarr:
@@ -246,7 +247,7 @@ services:
     cap_drop: [all]
     security_opt: [no-new-privileges:true]
     ports:
-      - 8191:8191 # Flaresolverr API Port
+      - ${FLARESOLVERR_PORT}:${FLARESOLVERR_PORT} # Flaresolverr API Port
 
   # JellyFin
   jellyfin:
@@ -258,12 +259,12 @@ services:
     volumes:
       - jellyfin:/config
       - ${MEDIALIBRARY_DIRECTORY}:/data # Point this to your final media library folder
-      - /dev/dri:/dev/dri
+      - /dev/dri:/dev/dri # Remove if /dev/dri doesn't exist
     ports:
-      - 8096:8096 # Jellyfin WebUI port
-      - 8920:8920 # Jellyfin HTTPS WebUI port
-      - 1900:1900/udp # Jellyfin DLNA port
-      - 7359:7359/udp # Jellyfin Client AutoDiscovery port
+      - ${JELLYFIN_HTTP_PORT}:${JELLYFIN_HTTP_PORT} # Jellyfin WebUI port
+      - ${JELLYFIN_HTTPS_PORT}:${JELLYFIN_HTTPS_PORT} # Jellyfin HTTPS WebUI port
+      - ${JELLYFIN_DLNA_PORT}:${JELLYFIN_DLNA_PORT/udp # Jellyfin DLNA port
+      - ${JELLYFIN_AUTODISCOVERY_PORT}:${JELLYFIN_AUTODISCOVERY_PORT}/udp # Jellyfin Client AutoDiscovery port
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
@@ -290,7 +291,7 @@ services:
       - deemix:/config
       - ${MEDIALIBRARY_DIRECTORY}/music:/downloads # Point this to where you want to download music to
     ports:
-      - 6595:6595 # Deemix WebUI port
+      - ${DEEMIX_PORT}:${DEEMIX_PORT} # Deemix WebUI port
 
 volumes:
   postgresql:
