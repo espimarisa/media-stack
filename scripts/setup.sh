@@ -4,6 +4,7 @@
 docker volume create postgresql-volume
 docker volume create redis-volume
 docker volume create nginx-volume
+docker volume create letsencrypt-volume
 docker volume create nextcloud-volume
 docker volume create searxng-volume
 docker volume create homepage-volume
