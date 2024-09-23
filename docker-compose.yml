@@ -23,10 +23,10 @@ services:
     network_mode: "host"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./certs:/certs
-      - ./config:/config
-      - ./data:/data
-      - ./sites:/srv
+      - ./caddy/certs:/certs
+      - ./caddy/config:/config
+      - ./caddy/data:/data
+      - ./caddy/sites:/srv
 
   # Redis
   redis:
@@ -128,7 +128,7 @@ services:
       - ENABLE_PRIVOXY=yes
       - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
     volumes:
-      - qbittorrentvpn:/config
+      - ./qbittorrentvpn/config:/config
       - ${STORAGE_DIRECTORY}:/storage
       - /lib/modules:/lib/modules
     ports:
@@ -218,7 +218,7 @@ services:
       - SONARR_API_KEY=${SONARR_API_KEY}
       - RADARR_API_KEY=${RADARR_API_KEY}
     volumes:
-      - recyclarr:/config
+      - ./recyclarr:/config
 
   # Flaresolverr
   flaresolverr:
@@ -285,12 +285,6 @@ volumes:
   searxng:
     external: true
     name: searxng-volume
-  homepage:
-    external: true
-    name: homepage-volume
-  qbittorrentvpn:
-    external: true
-    name: qbittorrentvpn-volume
   radarr:
     external: true
     name: radarr-volume
@@ -303,9 +297,6 @@ volumes:
   readarr:
     external: true
     name: readarr-volume
-  recyclarr:
-    external: true
-    name: recyclarr-volume
   jellyfin:
     external: true
     name: jellyfin-volume

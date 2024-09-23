@@ -17,3 +17,6 @@ docker volume create deemix-volume
 # Creates network
 docker network create global-network
 docker network create download-network
+
+# Makes a temporary wireguard config
+touch qbittorrent-vpn/wireguard/wg0.conf

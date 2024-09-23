@@ -1,3 +1,7 @@
+qbittorrent-vpn/*
+!qbittorrent-vpn/hardlinks.py
+caddy/*
+
 # Binaries and archives
 *.jar
 *.exe
