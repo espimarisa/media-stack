@@ -263,7 +263,7 @@ services:
     ports:
       - ${JELLYFIN_HTTP_PORT}:${JELLYFIN_HTTP_PORT} # Jellyfin WebUI port
       - ${JELLYFIN_HTTPS_PORT}:${JELLYFIN_HTTPS_PORT} # Jellyfin HTTPS WebUI port
-      - ${JELLYFIN_DLNA_PORT}:${JELLYFIN_DLNA_PORT/udp # Jellyfin DLNA port
+      - ${JELLYFIN_DLNA_PORT}:${JELLYFIN_DLNA_PORT}/udp # Jellyfin DLNA port
       - ${JELLYFIN_AUTODISCOVERY_PORT}:${JELLYFIN_AUTODISCOVERY_PORT}/udp # Jellyfin Client AutoDiscovery port
     environment:
       - TZ=${TZ}
