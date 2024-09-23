@@ -16,19 +16,17 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  # nginx proxy manager
-  nginx:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx
+  caddy:
+    image: caddy:alpine
+    container_name: caddy
     restart: unless-stopped
-    networks: [globalNetwork]
+    network_mode: "host"
     volumes:
-      - nginx:/data
-      - letsencrypt:/etc/letsencrypt
-    ports:
-      - 80:80
-      - 443:443
-      - 81:81
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./certs:/certs
+      - ./config:/config
+      - ./data:/data
+      - ./sites:/srv
 
   # Redis
   redis:
@@ -62,13 +60,14 @@ services:
 
   # NextCloud AIO
   nextcloud-aio-mastercontainer:
+    init: true
     image: nextcloud/all-in-one:latest
     container_name: nextcloud-aio-mastercontainer
     restart: unless-stopped
-    network_mode: host
+    network_mode: bridge
     environment:
       - APACHE_PORT=11000
-      - APACHE_IP_BINDING=0.0.0.0
+      - APACHE_IP_BINDING=127.0.0.1
       - NEXTCLOUD_DATADIR=${NEXTCLOUD_DIRECTORY}
       - NEXTCLOUD_UPLOAD_LIMIT=100G
       - NEXTCLOUD_MAX_TIME=12000
@@ -280,12 +279,6 @@ volumes:
   redis:
     external: true
     name: redis-volume
-  nginx:
-    external: true
-    name: nginx-volume
-  letsencrypt:
-    external: true
-    name: letsencrypt-volume
   nextcloud_aio_mastercontainer:
     external: true
     name: nextcloud_aio_mastercontainer
