@@ -145,7 +145,7 @@ services:
       - ENABLE_PRIVOXY=yes
       - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
     volumes:
-      - qbittorrentvpn/config:/config
+      - qbittorrentvpn:/config
       - ${STORAGE_DIRECTORY}:/storage
       - /lib/modules:/lib/modules
     ports:
