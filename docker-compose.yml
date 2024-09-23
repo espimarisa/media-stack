@@ -231,7 +231,7 @@ services:
     restart: unless-stopped
     networks: [globalNetwork, downloadNetwork]
     depends_on: [qbittorrentvpn, radarr, sonarr, prowlarr]
-    env:
+    environment:
       - SONARR_API_KEY=${SONARR_API_KEY}
       - RADARR_API_KEY=${RADARR_API_KEY}
     volumes:
