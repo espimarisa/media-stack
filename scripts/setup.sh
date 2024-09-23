@@ -12,7 +12,9 @@ docker volume create radarr-volume
 docker volume create sonarr-volume
 docker volume create prowlarr-volume
 docker volume create readarr-volume
+docker volume create recyclarr-volume
 docker volume create jellyfin-volume
+docker volume create deemix-volume
 
 # Creates network
 docker network create global-network

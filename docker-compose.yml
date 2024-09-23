@@ -329,6 +329,9 @@ volumes:
   readarr:
     external: true
     name: readarr-volume
+  recyclarr:
+    external: true
+    name: recyclarr-volume
   jellyfin:
     external: true
     name: jellyfin-volume
