@@ -1,0 +1,10 @@
+# Default to auto, LF
+* text=auto eol=lf
+
+# Bash should always end in lf
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Batch should always end in crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf

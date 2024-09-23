@@ -1,0 +1,345 @@
+services:
+  # Docker proxy
+  dockerproxy:
+    image: lscr.io/linuxserver/socket-proxy:latest
+    container_name: dockerproxy
+    restart: unless-stopped
+    networks: [globalNetwork]
+    cap_drop: [all]
+    environment:
+      - CONTAINERS=1
+      - SERVICES=1
+      - TASKS=1
+      - POST=0
+    ports:
+      - 127.0.0.1:2375:2375
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  # nginx proxy manager
+  nginx:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx
+    restart: unless-stopped
+    networks: [globalNetwork]
+    volumes:
+      - nginx:/data
+      - letsencrypt:/etc/letsencrypt
+    ports:
+      - 80:80
+      - 443:443
+      - 81:81
+
+  # PostgreSQL
+  postgres:
+    image: bitnami/postgresql:13
+    container_name: nextcloud-postgresql
+    restart: unless-stopped
+    networks: [globalNetwork]
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGESQL_DATABASE=${POSTGRES_DATABASE}
+    volumes:
+      - postgresql:/bitnami/postgresql
+
+  # Redis
+  redis:
+    container_name: redis
+    image: valkey/valkey:8-alpine
+    command: valkey-server --save 30 1 --loglevel warning
+    restart: unless-stopped
+    cap_drop: [ALL]
+    cap_add: [SETGID, SETUID, DAC_OVERRIDE]
+    networks: [globalNetwork]
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - redis:/data
+
+  # SearxNG
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETGID, SETUID]
+    networks: [globalNetwork]
+    depends_on: [redis]
+    environment:
+      - SEARXNG_BASEURL=${SEARXNG_BASEURL}
+    ports:
+      - 8080:8080
+    volumes:
+      - searxng:/etc/searxng
+
+  # NextCloud
+  nextcloud:
+    image: lscr.io/linuxserver/nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    networks: [globalNetwork]
+    depends_on: [nextcloud-redis, postgres]
+    environment:
+      - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS}
+      - REDIS_HOST=nextcloud-redis
+    volumes:
+        - nextcloud:/config
+        - ${STORAGE_DIRECTORY}/nextcloud:/data
+    ports:
+        - 6969:6969
+
+  # NextCloud redis instance
+  nextcloud-redis:
+    image: bitnami/redis:latest
+    restart: unless-stopped
+    container_name: nextcloud-redis
+    networks: [globalNetwork]
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  # Cloudflare-ddns
+  cloudflare-ddns:
+    image: favonia/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
+    restart: always
+    network_mode: host # Docker requires network_mode be set to host in order to access the IPv6 public address
+    read_only: true
+    cap_drop: [all]
+    security_opt: [no-new-privileges:true]
+    environment:
+      - CF_API_TOKEN=${CF_API_TOKEN}
+      - CF_DOMAINS=${CF_DOMAINS}
+      - CF_PROXIED=${CF_PROXIED}
+
+  # Homepage
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    networks: [globalNetwork, downloadNetwork]
+    volumes:
+      - homepage:/app/config # Homepage config
+    ports:
+      - 3000:3000 # Homepage WebUI port
+
+  # qBittorrent
+  qbittorrentvpn:
+    image: binhex/arch-qbittorrentvpn:latest
+    container_name: qbittorrentvpn
+    restart: unless-stopped
+    privileged: true # Required for WireGuard
+    networks: [downloadNetwork]
+    cap_add: [NET_ADMIN]
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1 # Required for WireGuard
+    environment:
+      - VPN_ENABLED=yes
+      - VPN_CLIENT=${VPN_CLIENT}
+      - VPN_PROV=${VPN_PROV}
+      - VPN_USER=${VPN_USER}
+      - VPN_PASS=${VPN_PASS}
+      - STRICT_PORT_FORWARDING=yes
+      - NAME_SERVERS=94.140.14.14,94.140.15.15,2a10:50c0::ad1:ff,2a10:50c0::ad2:ff # AdGuard Public DNS
+      - LAN_NETWORK=${LAN_NETWORK}
+      - ENABLE_PRIVOXY=yes
+      - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
+    volumes:
+      - qbittorrentvpn/config:/config
+      - ${STORAGE_DIRECTORY}:/storage
+      - /lib/modules:/lib/modules
+    ports:
+      - 8088:8088 # qBittorrent WebUI Port
+      - 8118:8118 # Privoxy Port
+
+  # Radarr
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    networks: [globalNetwork, downloadNetwork]
+    depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+    volumes:
+      - radarr:/config
+      - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
+    ports:
+      - 7878:7878 # Radarr WebUI port
+
+  # Sonarr
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    networks: [globalNetwork, downloadNetwork]
+    depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+    volumes:
+      - sonarr:/config
+      - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
+    ports:
+      - 8989:8989 # Sonarr WebUI port
+
+  # Readarr
+  readarr:
+    image: lscr.io/linuxserver/readarr:develop
+    container_name: readarr
+    restart: unless-stopped
+    networks: [globalNetwork, downloadNetwork]
+    depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+    volumes:
+      - readarr:/config
+      - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
+    ports:
+      - 8787:8787 # Readarr WebUI port
+
+  # Prowlarr
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    networks: [globalNetwork, downloadNetwork]
+    depends_on: [qbittorrentvpn, flaresolverr]
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+    volumes:
+      - prowlarr:/config
+      - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
+    ports:
+      - 9696:9696 # Prowlarr WebUI port
+
+  # Recyclarr
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:latest
+    container_name: recyclarr
+    restart: unless-stopped
+    networks: [globalNetwork, downloadNetwork]
+    depends_on: [qbittorrentvpn, radarr, sonarr, prowlarr]
+    env:
+      - SONARR_API_KEY=${SONARR_API_KEY}
+      - RADARR_API_KEY=${RADARR_API_KEY}
+    volumes:
+      - recyclarr:/config
+
+  # Flaresolverr
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    networks: [globalNetwork, downloadNetwork]
+    cap_drop: [all]
+    security_opt: [no-new-privileges:true]
+    ports:
+      - 8191:8191 # Flaresolverr API Port
+
+  # JellyFin
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    runtime: nvidia
+    networks: [globalNetwork, downloadNetwork]
+    volumes:
+      - jellyfin:/config
+      - ${MEDILIBRARY_DIRECTORY}:/data # Point this to your final media library folder
+      - /dev/dri:/dev/dri
+    ports:
+      - 8096:8096 # Jellyfin WebUI port
+      - 8920:8920 # Jellyfin HTTPS WebUI port
+      - 1900:1900/udp # Jellyfin DLNA port
+      - 7359:7359/udp # Jellyfin Client AutoDiscovery port
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+      - DOCKER_MODS=ghcr.io/jumoog/intro-skipper # Allows adding the "skip intro" button to the web UI. Remove if you don't use this plugin
+      - NVIDIA_VISIBLE_DEVICES=all # Remove this and the following lines if you do not want NVIDIA support
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+  # Deemix
+  deemix:
+    image: registry.gitlab.com/bockiii/deemix-docker:latest
+    container_name: deemix
+    restart: unless-stopped
+    networks: [globalNetwork, downloadNetwork]
+    environment:
+      - DEEMIX_SINGLE_USER=true # Allows one global user login. Set to false if you wish for all users to provide their own config/ARL
+    volumes:
+      - deemix:/config
+      - ${MEDILIBRARY_DIRECTORY}/music:/downloads # Point this to where you want to download music to
+    ports:
+      - 6595:6595 # Deemix WebUI port
+
+volumes:
+  postgresql:
+    external: true
+    name: postgresql-volume
+  redis:
+    external: true
+    name: redis-volume
+  nginx:
+    external: true
+    name: nginx-volume
+  letsencrypt:
+    external: true
+    name: letsencrypt-volume
+  nextcloud:
+    external: true
+    name: nextcloud-volume
+  searxng:
+    external: true
+    name: searxng-volume
+  homepage:
+    external: true
+    name: homepage-volume
+  qbittorrentvpn:
+    external: true
+    name: qbittorrentvpn-volume
+  radarr:
+    external: true
+    name: radarr-volume
+  sonarr:
+    external: true
+    name: sonarr-volume
+  prowlarr:
+    external: true
+    name: prowlarr-volume
+  readarr:
+    external: true
+    name: readarr-volume
+  jellyfin:
+    external: true
+    name: jellyfin-volume
+  deemix:
+    external: true
+    name: deemix-volume
+
+networks:
+  globalNetwork:
+    external: true
+    name: global-network
+  downloadNetwork:
+    external: true
+    name: download-network

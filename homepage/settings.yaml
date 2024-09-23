@@ -1,0 +1,28 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/settings
+
+title: Bunny Dashboard # Homepage title
+favicon: https://www.espi.me/assets/images/favicon.png # Homepage favicon
+color: slate
+headerStyle: underlined
+target: _blank
+hideVersion: true
+showStats: true
+statusStyle: "dot"
+
+layout:
+  Media:
+    style: row
+    columns: 2
+    useEqualHeights: true
+
+  PVR:
+    style: row
+    columns: 4
+    useEqualHeights: true
+
+  Network:
+    style: row
+    columns: 3
+    useEqualHeights: true
