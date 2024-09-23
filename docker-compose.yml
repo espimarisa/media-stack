@@ -307,7 +307,7 @@ volumes:
     name: letsencrypt-volume
   nextcloud_aio_mastercontainer:
     external: true
-    name: nextcloud-aio-volume
+    name: nextcloud_aio_mastercontainer
   searxng:
     external: true
     name: searxng-volume
