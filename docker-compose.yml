@@ -91,7 +91,7 @@ services:
       - NEXTCLOUD_ENABLE_DRI_DEVICE=true # Disable if /dev/dri doesn't exist
       - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS}
     volumes:
-        - nextcloud:/mnt/docker-aio-config
+        - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
         - ${STORAGE_DIRECTORY}/nextcloud:/data
         - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
@@ -305,9 +305,9 @@ volumes:
   letsencrypt:
     external: true
     name: letsencrypt-volume
-  nextcloud:
+  nextcloud_aio_mastercontainer:
     external: true
-    name: nextcloud-volume
+    name: nextcloud-aio-volume
   searxng:
     external: true
     name: searxng-volume
