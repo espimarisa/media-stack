@@ -132,7 +132,7 @@ services:
       - PGID=${PGID}
       - UMASK=${UMASK}
     volumes:
-      - ./qbittorrentvpn/config:/config
+      - ./qbittorrent-vpn/config:/config
       - ${STORAGE_DIRECTORY}:/storage
       - /lib/modules:/lib/modules
     ports:
