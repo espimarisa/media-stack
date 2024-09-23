@@ -257,7 +257,7 @@ services:
     networks: [globalNetwork, downloadNetwork]
     volumes:
       - jellyfin:/config
-      - ${MEDILIBRARY_DIRECTORY}:/data # Point this to your final media library folder
+      - ${MEDIALIBRARY_DIRECTORY}:/data # Point this to your final media library folder
       - /dev/dri:/dev/dri
     ports:
       - 8096:8096 # Jellyfin WebUI port
@@ -288,7 +288,7 @@ services:
       - DEEMIX_SINGLE_USER=true # Allows one global user login. Set to false if you wish for all users to provide their own config/ARL
     volumes:
       - deemix:/config
-      - ${MEDILIBRARY_DIRECTORY}/music:/downloads # Point this to where you want to download music to
+      - ${MEDIALIBRARY_DIRECTORY}/music:/downloads # Point this to where you want to download music to
     ports:
       - 6595:6595 # Deemix WebUI port
 
