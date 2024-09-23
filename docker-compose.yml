@@ -151,7 +151,7 @@ services:
       - /lib/modules:/lib/modules
     ports:
       - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT} # qBittorrent WebUI Port
-      - ${PRIVOXY_PORT}:${PRIV} # Privoxy Port
+      - ${PRIVOXY_PORT}:${PRIVOXY_PORT} # Privoxy Port
 
   # Radarr
   radarr:
