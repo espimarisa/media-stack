@@ -5,7 +5,7 @@ docker volume create postgresql-volume
 docker volume create redis-volume
 docker volume create nginx-volume
 docker volume create letsencrypt-volume
-docker volume create nextcloud_aio_volume
+docker volume create nextcloud_aio_mastercontainer
 docker volume create searxng-volume
 docker volume create homepage-volume
 docker volume create qbittorrentvpn-volume
