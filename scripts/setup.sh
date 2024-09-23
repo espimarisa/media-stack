@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Creates volumes
-docker volume create postgresql-volume
 docker volume create redis-volume
 docker volume create nginx-volume
 docker volume create letsencrypt-volume
