@@ -69,7 +69,7 @@ services:
     environment:
       - SEARXNG_BASEURL=${SEARXNG_BASEURL}
     ports:
-      - ${SEARXNG_PORT}:${SEARXNG_PORT}
+      - ${SEARXNG_PORT}:8080
     volumes:
       - searxng:/etc/searxng
 
@@ -81,7 +81,7 @@ services:
     networks: [globalNetwork]
     depends_on: [postgres]
     environment:
-      - APACHE_PORT=${NEXTCLOUD_PORT}
+      - APACHE_PORT=8080
       - APACHE_IP_BINDING=127.0.0.1
       - NEXTCLOUD_DATADIR=${NEXTCLOUD_DIRECTORY}
       - NEXTCLOUD_UPLOAD_LIMIT=100G
@@ -93,7 +93,7 @@ services:
         - ${STORAGE_DIRECTORY}/nextcloud:/data
         - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-        - ${NEXTCLOUD_PORT}:${NEXTCLOUD_PORT}
+        - 8080:8080
         - 8443:8443
 
   # Cloudflare-ddns
