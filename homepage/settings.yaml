@@ -2,14 +2,13 @@
 # For configuration options and examples, please see:
 # https://gethomepage.dev/latest/configs/settings
 
-title: {{HOMEPAGE_VAR_TITLE}} # Homepage title
-favicon: {{HOMEPAGE_VAR_FAVICON}} # Homepage favicon
+title: "{{HOMEPAGE_VAR_TITLE}}" # Homepage title
+favicon: "{{HOMEPAGE_VAR_FAVICON}}" # Homepage favicon
 color: slate
 headerStyle: underlined
 target: _blank
 hideVersion: true
 showStats: true
-statusStyle: "dot"
 
 layout:
   Media:

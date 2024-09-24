@@ -104,9 +104,12 @@ services:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     restart: unless-stopped
+    env_file:
+      - .env
     networks: [globalNetwork, downloadNetwork]
     volumes:
       - ./homepage:/app/config # Homepage config
+      - ${STORAGE_DIRECTORY}:/storage
     ports:
       - ${HOMEPAGE_PORT}:${HOMEPAGE_PORT} # Homepage WebUI port
 
@@ -178,6 +181,24 @@ services:
       - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
     ports:
       - ${SONARR_PORT}:${SONARR_PORT} # Sonarr WebUI port
+
+  # Lidarr
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    restart: unless-stopped
+    networks: [globalNetwork, downloadNetwork]
+    depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=${UMASK}
+    volumes:
+      - lidarr:/config
+      - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
+    ports:
+      - ${LIDARR_PORT}:${LIDARR_PORT} # Sonarr WebUI port
 
   # Readarr
   readarr:
@@ -299,12 +320,15 @@ volumes:
   sonarr:
     external: true
     name: sonarr-volume
-  prowlarr:
+  lidarr:
     external: true
-    name: prowlarr-volume
+    name: lidarr-volume
   readarr:
     external: true
     name: readarr-volume
+  prowlarr:
+    external: true
+    name: prowlarr-volume
   jellyfin:
     external: true
     name: jellyfin-volume

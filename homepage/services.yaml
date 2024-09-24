@@ -5,8 +5,8 @@
 - Media:
     - Jellyfin:
         icon: jellyfin
-        href: {{HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL}}
-        ping: {{HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL}}
+        href: "{{HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL}}"
+        ping: "{{HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL}}"
         container: jellyfin
         server: my-docker
         showStats: true
@@ -14,127 +14,126 @@
           enableBlocks: true
           fields: ["movies", "episodes", "songs", "series"]
           type: jellyfin
-          url: {{HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL}}
-          key: {{HOMEPAGE_VAR_JELLYFIN_API_KEY}}
+          url: "{{HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL}}"
+          key: "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}"
 
 - Tools:
     - NextCloud:
         icon: nextcloud
-        href: {{HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL}}
-        ping: {{HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL}}
+        href: "{{HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL}}"
+        ping: "{{HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL}}"
         container: nextcloud-aio-mastercontainer
         server: my-docker
         showStats: true
         widget:
           type: nextcloud
           fields: ["freespace", "numfiles"]
-          url: {{HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL}}
-          key: {{HOMEPAGE_VAR_NEXTCLOUD_API_KEY}}
+          url: "{{HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL}}"
+          key: "{{HOMEPAGE_VAR_NEXTCLOUD_API_KEY}}"
 
     - SearxNG:
-        icon: search
-        href: {{HOMEPAGE_VAR_SEARXNG_PUBLISHED_URL}}
-        ping: {{HOMEPAGE_VAR_SEARXNG_PUBLISHED_URL}}
+        icon: si-searxng-#3050FF
+        href: "{{HOMEPAGE_VAR_SEARXNG_PUBLISHED_URL}}"
+        ping: "{{HOMEPAGE_VAR_SEARXNG_PUBLISHED_URL}}"
         container: searxng
         server: my-docker
         showStats: true
 
     - Caddy:
         icon: caddy
-        ping: http://caddy
+        ping: http://localhost:2019
         container: caddy
         server: my-docker
         showStats: true
         widget:
           type: caddy
           fields: ["upstreams", "requests", "requests_failed"]
-          url: http://caddy:2019
 
 - Indexers:
     - Sonarr:
         icon: sonarr
-        href: {{HOMEPAGE_VAR_SONARR_PUBLISHED_URL}}
-        ping: {{HOMEPAGE_VAR_SONARR_PUBLISHED_URL}}
+        href: "{{HOMEPAGE_VAR_SONARR_PUBLISHED_URL}}"
+        ping: "{{HOMEPAGE_VAR_SONARR_PUBLISHED_URL}}"
         container: sonarr
         server: my-docker
         showStats: true
         widget:
           type: sonarr
           fields: ["wanted", "queued"]
-          url: {{HOMEPAGE_VAR_SONARR_PUBLISHED_URL}}
-          key: {{HOMEPAGE_VAR_SONARR_API_KEY}}
+          url: "{{HOMEPAGE_VAR_SONARR_PUBLISHED_URL}}"
+          key: "{{HOMEPAGE_VAR_SONARR_API_KEY}}"
 
     - Radarr:
         icon: radarr
-        href: {{HOMEPAGE_VAR_RADARR_PUBLISHED_URL}}
-        ping: {{HOMEPAGE_VAR_RADARR_PUBLISHED_URL}}
+        href: "{{HOMEPAGE_VAR_RADARR_PUBLISHED_URL}}"
+        ping: "{{HOMEPAGE_VAR_RADARR_PUBLISHED_URL}}"
         container: radarr
         server: my-docker
         showStats: true
         widget:
           type: radarr
           fields: ["wanted", "missing", "queued"]
-          url: {{HOMEPAGE_VAR_RADARR_PUBLISHED_URL}}
-          key: {{HOMEPAGE_VAR_RADARR_API_KEY}}
+          url: "{{HOMEPAGE_VAR_RADARR_PUBLISHED_URL}}"
+          key: "{{HOMEPAGE_VAR_RADARR_API_KEY}}"
 
     - Lidarr:
         icon: lidarr
-        href: {{HOMEPAGE_VAR_LIDARR_PUBLISHED_URL}}
-        ping: {{HOMEPAGE_VAR_LIDARR_PUBLISHED_URL}}
-        container: sonarr
+        href: "{{HOMEPAGE_VAR_LIDARR_PUBLISHED_URL}}"
+        ping: "{{HOMEPAGE_VAR_LIDARR_PUBLISHED_URL}}"
+        container: lidarr
         server: my-docker
         showStats: true
         widget:
           type: lidarr
           fields: ["wanted", "queued", "artists"]
-          url: {{HOMEPAGE_VAR_LIDARR_PUBLISHED_URL}}
-          key: {{HOMEPAGE_VAR_LIDARR_API_KEY}}
+          url: "{{HOMEPAGE_VAR_LIDARR_PUBLISHED_URL}}"
+          key: "{{HOMEPAGE_VAR_LIDARR_API_KEY}}"
 
     - Readarr:
         icon: readarr
-        href: {{HOMEPAGE_VAR_READARR_PUBLISHED_URL}}
-        ping: {{HOMEPAGE_VAR_READARR_PUBLISHED_URL}}
+        href: "{{HOMEPAGE_VAR_READARR_PUBLISHED_URL}}"
+        ping: "{{HOMEPAGE_VAR_READARR_PUBLISHED_URL}}"
         container: readarr
         server: my-docker
         showStats: true
         widget:
           type: readarr
           fields: ["wanted", "queued", "books"]
-          url: {{HOMEPAGE_VAR_READARR_PUBLISHED_URL}}
-          key: {{HOMEPAGE_VAR_READARR_API_KEY}}
+          url: "{{HOMEPAGE_VAR_READARR_PUBLISHED_URL}}"
+          key: "{{HOMEPAGE_VAR_READARR_API_KEY}}"
 
     - Prowlarr:
         icon: prowlarr
-        href: {{HOMEPAGE_VAR_PROWLARR_PUBLISHED_URL}}
-        ping: {{HOMEPAGE_VAR_PROWLARR_PUBLISHED_URL}}
+        href: "{{HOMEPAGE_VAR_PROWLARR_PUBLISHED_URL}}"
+        ping: "{{HOMEPAGE_VAR_PROWLARR_PUBLISHED_URL}}"
         container: prowlarr
         server: my-docker
         showStats: true
         widget:
           type: prowlarr
           fields: ["numberOfGrabs", "numberOfQueries", "numberOfFailGrabs", "numberOfFailQueries"]
-          url: {{HOMEPAGE_VAR_PROWLARR_PUBLISHED_URL}}
-          key: {{HOMEPAGE_VAR_PROWLARR_API_KEY}}
+          url: "{{HOMEPAGE_VAR_PROWLARR_PUBLISHED_URL}}"
+          key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
 
 - Downloaders:
-    - Deemix:
-        icon: lidarr
-        href: {{HOMEPAGE_VAR_DEEMIX_PUBLISHED_URL}}
-        ping: {{HOMEPAGE_VAR_DEEMIX_PUBLISHED_URL}}
-        container: deemix
-        server: my-docker
-        showStats: true
-
     - qBittorrent:
         icon: qbittorrent
-        href: {{HOMEPAGE_VAR_QBITTORRENT_PUBLISHED_URL}}
-        ping: {{HOMEPAGE_VAR_QBITTORRENT_PUBLISHED_URL}}
+        href: "{{HOMEPAGE_VAR_QBITTORRENT_PUBLISHED_URL}}"
+        ping: "{{HOMEPAGE_VAR_QBITTORRENT_PUBLISHED_URL}}"
         container: qbittorrentvpn
         server: my-docker
         showStats: true
         widget:
           type: qbittorrent
           fields: ["leech", "seed", "download", "upload"]
-          url: {{HOMEPAGE_VAR_QBITTORRENT_PUBLISHED_URL}}
-          username: {{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}
-          password: {{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}
+          url: "{{HOMEPAGE_VAR_QBITTORRENT_PUBLISHED_URL}}"
+          username: "{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}"
+          password: "{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}"
+
+    - Deemix:
+        icon: si-musicbrainz-#BA478F
+        href: "{{HOMEPAGE_VAR_DEEMIX_PUBLISHED_URL}}"
+        ping: "{{HOMEPAGE_VAR_DEEMIX_PUBLISHED_URL}}"
+        container: deemix
+        server: my-docker
+        showStats: true

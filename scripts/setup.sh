@@ -8,6 +8,7 @@ docker volume create homepage-volume
 docker volume create qbittorrentvpn-volume
 docker volume create radarr-volume
 docker volume create sonarr-volume
+docker volume create lidarr-volume
 docker volume create prowlarr-volume
 docker volume create readarr-volume
 docker volume create recyclarr-volume

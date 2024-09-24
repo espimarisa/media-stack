@@ -1,0 +1,22 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/service-widgets
+
+- logo:
+    icon: "{{HOMEPAGE_VAR_FAVICON}}"
+
+- resources:
+    cpu: true
+    memory: true
+    disk: /storage
+    cputemp: true
+    tempmin: 0
+    tempmax: 95
+    uptime: true
+    refresh: 3000
+    expanded: true
+
+- datetime:
+    format:
+      dateStyle: long
+      timeStyle: long
