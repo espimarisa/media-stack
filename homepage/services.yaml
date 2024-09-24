@@ -1,3 +1,140 @@
 ---
 # For configuration options and examples, please see:
 # https://gethomepage.dev/latest/configs/services
+
+- Media:
+    - Jellyfin:
+        icon: jellyfin
+        href: ${JELLYFIN_PUBLISHED_URL}
+        ping: ${JELLYFIN_PUBLISHED_URL}
+        container: jellyfin
+        server: my-docker
+        showStats: true
+        widget:
+          enableBlocks: true
+          fields: ["movies", "episodes", "songs", "series"]
+          type: jellyfin
+          url: ${JELLYFIN_PUBLISHED_URL}
+          key: ${JELLYFIN_API_KEY}
+
+- Tools:
+    - NextCloud:
+        icon: nextcloud
+        href: ${NEXTCLOUD_PUBLISHED_URL}
+        ping: ${NEXTCLOUD_PUBLISHED_URL}
+        container: nextcloud-aio-mastercontainer
+        server: my-docker
+        showStats: true
+        widget:
+          type: nextcloud
+          fields: ["freespace", "numfiles"]
+          url: ${NEXTCLOUD_PUBLISHED_URL}
+          key: ${NEXTCLOUD_API_KEY}
+
+    - SearxNG:
+        icon: search
+        href: ${SEARXNG_PUBLISHED_URL}
+        ping: ${SEARXNG_PUBLISHED_URL}
+        container: searxng
+        server: my-docker
+        showStats: true
+
+    - Caddy:
+        icon: caddy
+        ping: http://caddy
+        container: caddy
+        server: my-docker
+        showStats: true
+        widget:
+          type: caddy
+          fields: ["upstreams", "requests", "requests_failed"]
+          url: http://caddy:2019
+
+- Indexers:
+    - Sonarr:
+        icon: sonarr
+        href: ${SONARR_PUBLISHED_URL}
+        ping: ${SONARR_PUBLISHED_URL}
+        container: sonarr
+        server: my-docker
+        showStats: true
+        widget:
+          type: sonarr
+          fields: ["wanted", "queued"]
+          url: ${SONARR_PUBLISHED_URL}
+          key: ${SONARR_API_KEY}
+
+    - Radarr:
+        icon: radarr
+        href: ${RADARR_PUBLISHED_URL}
+        ping: ${RADARR_PUBLISHED_URL}
+        container: radarr
+        server: my-docker
+        showStats: true
+        widget:
+          type: radarr
+          fields: ["wanted", "missing", "queued"]
+          url: ${RADARR_PUBLISHED_URL}
+          key: ${RADARR_API_KEY}
+
+    - Lidarr:
+        icon: lidarr
+        href: ${LIDARR_PUBLISHED_URL}
+        ping: ${LIDARR_PUBLISHED_URL}
+        container: sonarr
+        server: my-docker
+        showStats: true
+        widget:
+          type: lidarr
+          fields: ["wanted", "queued", "artists"]
+          url: ${LIDARR_PUBLISHED_URL}
+          key: ${LIDARR_API_KEY}
+
+    - Readarr:
+        icon: readarr
+        href: ${READARR_PUBLISHED_URL}
+        ping: ${READARR_PUBLISHED_URL}
+        container: readarr
+        server: my-docker
+        showStats: true
+        widget:
+          type: readarr
+          fields: ["wanted", "queued", "books"]
+          url: ${READARR_PUBLISHED_URL}
+          key: ${READARR_API_KEY}
+
+    - Prowlarr:
+        icon: prowlarr
+        href: ${PROWLARR_PUBLISHED_URL}
+        ping: ${PROWLARR_PUBLISHED_URL}
+        container: prowlarr
+        server: my-docker
+        showStats: true
+        widget:
+          type: prowlarr
+          fields: ["numberOfGrabs", "numberOfQueries", "numberOfFailGrabs", "numberOfFailQueries"]
+          url: ${PROWLARR_PUBLISHED_URL}
+          key: ${PROWLARR_API_KEY}
+
+- Downloaders:
+    - Deemix:
+        icon: lidarr
+        href: ${DEEMIX_PUBLISHED_URL}
+        ping: ${DEEMIX_PUBLISHED_URL}
+        container: deemix
+        server: my-docker
+        showStats: true
+
+    - qBittorrent:
+        icon: qbittorrent
+        href: ${QBITTORRENT_PUBLISHED_URL}
+        ping: ${QBITTORRENT_PUBLISHED_URL}
+        container: qbittorrentvpn
+        server: my-docker
+        showStats: true
+        widget:
+          type: qbittorrent
+          fields: ["leech", "seed", "download", "upload"]
+          url: ${QBITTORRENT_PUBLISHED_URL}
+          username: ${QBITTORRENT_USERNAME}
+          password: ${QBITTORRENT_PASSWORD}

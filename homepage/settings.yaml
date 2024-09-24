@@ -17,12 +17,17 @@ layout:
     columns: 2
     useEqualHeights: true
 
-  PVR:
+  Tools:
     style: row
-    columns: 4
+    columns: 2
     useEqualHeights: true
 
-  Network:
+  Indexers:
     style: row
     columns: 3
+    useEqualHeights: true
+
+  Downloaders:
+    style: row
+    columns: 2
     useEqualHeights: true

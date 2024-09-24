@@ -20,7 +20,7 @@ services:
     image: caddy:alpine
     container_name: caddy
     restart: unless-stopped
-    network_mode: "host"
+    networks: [globalNetwork]
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy/certs:/certs
@@ -64,7 +64,7 @@ services:
     image: nextcloud/all-in-one:latest
     container_name: nextcloud-aio-mastercontainer
     restart: unless-stopped
-    network_mode: bridge
+    networks: [globalNetwork]
     environment:
       - APACHE_PORT=11000
       - APACHE_IP_BINDING=127.0.0.1
