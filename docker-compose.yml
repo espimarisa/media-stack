@@ -33,7 +33,7 @@ services:
       - ./caddy/sites:/srv
 
   # Redis
-  redis:
+  redis:  
     container_name: redis
     image: valkey/valkey:8-alpine
     command: valkey-server --save 30 1 --loglevel warning
@@ -134,10 +134,10 @@ services:
       - LAN_NETWORK=${LAN_NETWORK}
       - ENABLE_PRIVOXY=yes
       - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=${UMASK}
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
     volumes:
       - ./qbittorrent-vpn/config:/config
       - ${STORAGE_DIRECTORY}:/storage
@@ -154,10 +154,10 @@ services:
     networks: [globalNetwork, downloadNetwork]
     depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
     environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=${UMASK}
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
     volumes:
       - radarr:/config
       - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
@@ -172,10 +172,10 @@ services:
     networks: [globalNetwork, downloadNetwork]
     depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
     environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=${UMASK}
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
     volumes:
       - sonarr:/config
       - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
@@ -190,10 +190,10 @@ services:
     networks: [globalNetwork, downloadNetwork]
     depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
     environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=${UMASK}
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
     volumes:
       - lidarr:/config
       - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
@@ -208,10 +208,10 @@ services:
     networks: [globalNetwork, downloadNetwork]
     depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
     environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=${UMASK}
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
     volumes:
       - readarr:/config
       - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
@@ -226,10 +226,10 @@ services:
     networks: [globalNetwork, downloadNetwork]
     depends_on: [qbittorrentvpn, flaresolverr]
     environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=${UMASK}
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
     volumes:
       - prowlarr:/config
       - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory. I use my entire RAID array here
@@ -277,10 +277,10 @@ services:
       - ${JELLYFIN_DLNA_PORT}:${JELLYFIN_DLNA_PORT}/udp # Jellyfin DLNA port
       - ${JELLYFIN_AUTODISCOVERY_PORT}:${JELLYFIN_AUTODISCOVERY_PORT}/udp # Jellyfin Client AutoDiscovery port
     environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=${UMASK}
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
       - DOCKER_MODS=ghcr.io/jumoog/intro-skipper # Allows adding the "skip intro" button to the web UI. Remove if you don't use this plugin
       - NVIDIA_VISIBLE_DEVICES=all # Remove this and the following lines if you do not want NVIDIA support
     deploy:
