@@ -1,4 +1,12 @@
-allowed_categories = ["anime", "anime-movies",  "tv", "movies", "manga", "comics", "music", "roms", "isos", "software"] # Categories to create hardlinks for
+from os.path import splitdrive, split as dirsplit, basename, isdir
+import sys
+import shlex
+import subprocess
+from time import sleep
+path = sys.argv[1]
+category = sys.argv[2]
+
+allowed_categories = ["anime", "anime-movies", "tv", "movies", "manga", "comics", "music", "roms", "isos", "software"] # Categories to create hardlinks for
 
 if category not in allowed_categories:
     exit()
