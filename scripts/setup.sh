@@ -20,4 +20,4 @@ docker network create global-network
 docker network create download-network
 
 # Makes a temporary wireguard config
-touch qbittorrent-vpn/wireguard/wg0.conf
+touch ../qbittorrent-vpn/wireguard/wg0.conf
