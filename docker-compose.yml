@@ -246,8 +246,8 @@ services:
     networks: [globalNetwork, downloadNetwork]
     depends_on: [qbittorrentvpn, radarr, sonarr, prowlarr]
     environment:
-      - SONARR_API_KEY=${SONARR_API_KEY}
-      - RADARR_API_KEY=${RADARR_API_KEY}
+      - VAR_HOMEPAGE_SONARR_API_KEY=${VAR_HOMEPAGE_SONARR_API_KEY}
+      - VAR_HOMEPAGE_RADARR_API_KEY=${VAR_HOMEPAGE_RADARR_API_KEY}
     volumes:
       - ./recyclarr:/config
 
