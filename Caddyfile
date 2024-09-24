@@ -1,14 +1,14 @@
 # NextCloud
-{$NEXTCLOUD_PUBLISHED_URL}:443 {
+{$HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL}:443 {
     reverse_proxy localhost:11000
 }
 
 # SearxNG
-{$SEARXNG_PUBLISHED_URL}:443 {
+{$HOMEPAGE_VAR_SEARXNG_PUBLISHED_URL}:443 {
   reverse_proxy localhost:8085
 }
 
 # Jellyfin
-{$JELLYFIN_PUBLISHED_URL}:443 {
+{$HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL}:443 {
   reverse_proxy localhost:8096
 }
