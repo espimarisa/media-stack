@@ -20,7 +20,7 @@ services:
     image: caddy:alpine
     container_name: caddy
     restart: unless-stopped
-    networks: [globalNetwork]
+    network_mode: host # Docker requires network_mode be set to host in order to access the IPv6 public address
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy/certs:/certs
