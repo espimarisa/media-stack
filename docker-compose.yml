@@ -21,6 +21,10 @@ services:
     container_name: caddy
     restart: unless-stopped
     network_mode: host # Docker requires network_mode be set to host in order to access the IPv6 public address
+    environment:
+      - NEXTCLOUD_PUBLISHED_URL=${NEXTCLOUD_PUBLISHED_URL}
+      - SEARXNG_PUBLISHED_URL=${SEARXNG_PUBLISHED_URL}
+      - JELLYFIN_PUBLISHED_URL=${JELLYFIN_PUBLISHED_URL}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy/certs:/certs
