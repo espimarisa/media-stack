@@ -2,8 +2,8 @@
 # For configuration options and examples, please see:
 # https://gethomepage.dev/latest/configs/settings
 
-title: Bunny Dashboard # Homepage title
-favicon: https://www.espi.me/assets/images/favicon.png # Homepage favicon
+title: {{HOMEPAGE_VAR_TITLE}} # Homepage title
+favicon: {{HOMEPAGE_VAR_FAVICON}} # Homepage favicon
 color: slate
 headerStyle: underlined
 target: _blank
