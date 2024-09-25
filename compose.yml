@@ -15,6 +15,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  # Caddy
   caddy:
     image: caddy:alpine
     container_name: caddy
@@ -115,9 +116,26 @@ services:
       - ./homarr/configs:/app/data/configs
       - ./homarr/icons:/app/public/icons
       - ./homarr/data:/data
-      - ${STORAGE_DIRECTORY}:/storage
     ports:
       - ${HOMARR_PORT}:${HOMARR_PORT} # Homarr WebUI port
+
+  # Dash
+  dash:
+    image: mauricenino/dashdot:latest
+    container_name: dash
+    restart: unless-stopped
+    privileged: true # Required
+    networks: [globalNetwork, downloadNetwork]
+    volumes:
+      - /:/mnt/host:ro # Mount host, RO
+    ports:
+      - ${DASHDOT_PORT}:${DASHDOT_PORT} # Homarr WebUI port
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities:
+                - gpu
 
   # qBittorrent
   qbittorrentvpn:
