@@ -131,7 +131,7 @@ services:
     privileged: true # Required
     networks: [globalNetwork, downloadNetwork]
     environment:
-      DASHDOT_WIDGET_LIST: os,cpu,ram,gpu,storage,network
+      DASHDOT_WIDGET_LIST: os,cpu,ram,storage,network
       DASHDOT_SHOW_HOST: true
       DASHDOT_ALWAYS_SHOW_PERCENTAGES: true
       DASHDOT_ENABLE_CPU_TEMPS: true # Disable if you lack access to temps
@@ -144,12 +144,6 @@ services:
       - /:/mnt/host:ro # Mount host, RO
     ports:
       - ${DASHDOT_PORT}:${DASHDOT_PORT} # Dashdot WebUI port
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities:
-                - gpu
 
   # qBittorrent
   qbittorrentvpn:
