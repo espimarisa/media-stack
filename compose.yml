@@ -25,8 +25,12 @@ services:
       - NEXTCLOUD_PUBLISHED_URL=${NEXTCLOUD_PUBLISHED_URL}
       - SEARXNG_PUBLISHED_URL=${SEARXNG_PUBLISHED_URL}
       - JELLYFIN_PUBLISHED_URL=${JELLYFIN_PUBLISHED_URL}
+      - HOMARR_PUBLISHED_URL=${HOMARR_PUBLISHED_URL}
+      - DASHDOT_PUBLISHED_URL=${DASHDOT_PUBLISHED_URL}
       - SEARXNG_PORT=${SEARXNG_PORT}
       - JELLYFIN_PORT=${JELLYFIN_HTTP_PORT}
+      - HOMARR_PORT=${HOMARR_HPORT}
+      - DASHDOT_PORT=${DASHDOT_PORT}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy/certs:/certs
@@ -127,15 +131,15 @@ services:
     privileged: true # Required
     networks: [globalNetwork, downloadNetwork]
     environment:
-      - DASHDOT_WIDGET_LIST=os,cpu,ram,gpu,storage,network
-      - DASHDOT_SHOW_HOST=true
-      - DASHDOT_ALWAYS_SHOW_PERCENTAGES=true
-      - DASHDOT_ENABLE_CPU_TEMPS=true # Disable if you lack access to temps
-      - DASHDOT_OS_WIDGET_GROW=2.5
-      - DASHDOT_CPU_WIDGET_GROW=2.5
-      - DASHDOT_STORAGE_WIDGET_GROW=2.5
-      - DASHDOT_RAM_WIDGET_GROW=2.5
-      - DASHDOT_ACCEPT_OOKLA_EULA=true
+      - DASHDOT_WIDGET_LIST: os,cpu,ram,gpu,storage,network
+      - DASHDOT_SHOW_HOST: true
+      - DASHDOT_ALWAYS_SHOW_PERCENTAGES: true
+      - DASHDOT_ENABLE_CPU_TEMPS: true # Disable if you lack access to temps
+      - DASHDOT_OS_WIDGET_GROW: 2.5
+      - DASHDOT_CPU_WIDGET_GROW: 2.5
+      - DASHDOT_STORAGE_WIDGET_GROW: 2.5
+      - DASHDOT_RAM_WIDGET_GROW: 2.5
+      - DASHDOT_ACCEPT_OOKLA_EULA: true
     volumes:
       - /:/mnt/host:ro # Mount host, RO
     ports:
