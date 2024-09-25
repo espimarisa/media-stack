@@ -5,16 +5,13 @@ services:
     container_name: dockerproxy
     restart: unless-stopped
     networks: [globalNetwork]
-    read_only: true
-    tmpfs:
-      - /run
     environment:
       - CONTAINERS=1
       - SERVICES=1
       - TASKS=1
       - POST=0
     ports:
-      - 127.0.0.1:2375:2375
+      - 2375:2375
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
@@ -24,9 +21,11 @@ services:
     restart: unless-stopped
     network_mode: host # Docker requires network_mode be set to host in order to access the IPv6 public address
     environment:
-      - HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL=${HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL}
-      - HOMEPAGE_VAR_SEARXNG_PUBLISHED_URL=${HOMEPAGE_VAR_SEARXNG_PUBLISHED_URL}
-      - HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL=${HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL}
+      - NEXTCLOUD_PUBLISHED_URL=${HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL}
+      - SEARXNG_PUBLISHED_URL=${HOMEPAGE_VAR_SEARXNG_PUBLISHED_URL}
+      - JELLYFIN_PUBLISHED_URL=${HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL}
+      - SEARXNG_PORT=${SEARXNG_PORT}
+      - JELLYFIN_PORT=${JELLYFIN_HTTP_PORT}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy/certs:/certs
@@ -154,7 +153,7 @@ services:
     container_name: radarr
     restart: unless-stopped
     networks: [globalNetwork, downloadNetwork]
-    depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
+    depends_on: [qbittorrentvpn, flaresolverr]
     environment:
       - TZ=${GLOBAL_TZ}
       - PUID=${GLOBAL_PUID}
@@ -172,7 +171,7 @@ services:
     container_name: sonarr
     restart: unless-stopped
     networks: [globalNetwork, downloadNetwork]
-    depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
+    depends_on: [qbittorrentvpn, flaresolverr]
     environment:
       - TZ=${GLOBAL_TZ}
       - PUID=${GLOBAL_PUID}
@@ -190,7 +189,7 @@ services:
     container_name: lidarr
     restart: unless-stopped
     networks: [globalNetwork, downloadNetwork]
-    depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
+    depends_on: [qbittorrentvpn, flaresolverr]
     environment:
       - TZ=${GLOBAL_TZ}
       - PUID=${GLOBAL_PUID}
@@ -208,7 +207,7 @@ services:
     container_name: readarr
     restart: unless-stopped
     networks: [globalNetwork, downloadNetwork]
-    depends_on: [qbittorrentvpn, prowlarr, flaresolverr]
+    depends_on: [qbittorrentvpn, flaresolverr]
     environment:
       - TZ=${GLOBAL_TZ}
       - PUID=${GLOBAL_PUID}
@@ -226,7 +225,7 @@ services:
     container_name: prowlarr
     restart: unless-stopped
     networks: [globalNetwork, downloadNetwork]
-    depends_on: [qbittorrentvpn, flaresolverr]
+    depends_on: [qbittorrentvpn, radarr, sonarr, lidarr, readarr, flaresolverr]
     environment:
       - TZ=${GLOBAL_TZ}
       - PUID=${GLOBAL_PUID}
@@ -243,11 +242,11 @@ services:
     image: ghcr.io/recyclarr/recyclarr:latest
     container_name: recyclarr
     restart: unless-stopped
-    networks: [globalNetwork, downloadNetwork]
+    networks: [globalNetwork]
     depends_on: [qbittorrentvpn, radarr, sonarr, prowlarr]
     environment:
-      - HOMEPAGE_VAR_SONARR_API_KEY=${HOMEPAGE_VAR_SONARR_API_KEY}
-      - HOMEPAGE_VAR_RADARR_API_KEY=${HOMEPAGE_VAR_RADARR_API_KEY}
+      - SONARR_API_KEY=${HOMEPAGE_VAR_SONARR_API_KEY}
+      - RADARR_API_KEY=${HOMEPAGE_VAR_RADARR_API_KEY}
     volumes:
       - ./recyclarr:/config
 
@@ -256,7 +255,7 @@ services:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
     restart: unless-stopped
-    networks: [globalNetwork, downloadNetwork]
+    networks: [globalNetwork]
     cap_drop: [all]
     security_opt: [no-new-privileges:true]
     ports:
@@ -268,7 +267,7 @@ services:
     container_name: jellyfin
     restart: unless-stopped
     runtime: nvidia
-    networks: [globalNetwork, downloadNetwork]
+    networks: [globalNetwork]
     volumes:
       - jellyfin:/config
       - ${MEDIALIBRARY_DIRECTORY}:/data # Point this to your final media library folder
@@ -297,7 +296,7 @@ services:
     image: registry.gitlab.com/bockiii/deemix-docker:latest
     container_name: deemix
     restart: unless-stopped
-    networks: [globalNetwork, downloadNetwork]
+    networks: [globalNetwork]
     environment:
       - DEEMIX_SINGLE_USER=true # Allows one global user login. Set to false if you wish for all users to provide their own config/ARL
     volumes:
@@ -341,7 +340,9 @@ volumes:
 networks:
   globalNetwork:
     external: true
+    driver: bridge
     name: global-network
   downloadNetwork:
     external: true
+    driver: bridge
     name: download-network
