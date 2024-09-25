@@ -1,10 +1,11 @@
 qbittorrent-vpn/*
 !qbittorrent-vpn/hardlinks.py
 caddy/*
+*.sqlite
 
 # Binaries and archives
 *.jar
-*.exe
+*.extensions
 *.db
 *.tgz
 *.tar

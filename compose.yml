@@ -21,9 +21,9 @@ services:
     restart: unless-stopped
     network_mode: host # Docker requires network_mode be set to host in order to access the IPv6 public address
     environment:
-      - NEXTCLOUD_PUBLISHED_URL=${HOMEPAGE_VAR_NEXTCLOUD_PUBLISHED_URL}
-      - SEARXNG_PUBLISHED_URL=${HOMEPAGE_VAR_SEARXNG_PUBLISHED_URL}
-      - JELLYFIN_PUBLISHED_URL=${HOMEPAGE_VAR_JELLYFIN_PUBLISHED_URL}
+      - NEXTCLOUD_PUBLISHED_URL=${NEXTCLOUD_PUBLISHED_URL}
+      - SEARXNG_PUBLISHED_URL=${SEARXNG_PUBLISHED_URL}
+      - JELLYFIN_PUBLISHED_URL=${JELLYFIN_PUBLISHED_URL}
       - SEARXNG_PORT=${SEARXNG_PORT}
       - JELLYFIN_PORT=${JELLYFIN_HTTP_PORT}
     volumes:
@@ -104,19 +104,20 @@ services:
       - DOMAINS=${CF_DOMAINS}
       - PROXIED=${CF_PROXIED}
 
-  # Homepage
-  homepage:
-    image: ghcr.io/gethomepage/homepage:latest
-    container_name: homepage
+  # Homarr
+  homarr:
+    image: ghcr.io/ajnart/homarr:latest
+    container_name: homarr
     restart: unless-stopped
-    env_file:
-      - .env
     networks: [globalNetwork, downloadNetwork]
     volumes:
-      - ./homepage:/app/config # Homepage config
+      - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
+      - ./homarr/configs:/app/data/configs
+      - ./homarr/icons:/app/public/icons
+      - ./homarr/data:/data
       - ${STORAGE_DIRECTORY}:/storage
     ports:
-      - ${HOMEPAGE_PORT}:${HOMEPAGE_PORT} # Homepage WebUI port
+      - ${HOMARR_PORT}:${HOMARR_PORT} # Homarr WebUI port
 
   # qBittorrent
   qbittorrentvpn:
@@ -249,8 +250,8 @@ services:
     networks: [globalNetwork]
     depends_on: [qbittorrentvpn, radarr, sonarr, prowlarr]
     environment:
-      - SONARR_API_KEY=${HOMEPAGE_VAR_SONARR_API_KEY}
-      - RADARR_API_KEY=${HOMEPAGE_VAR_RADARR_API_KEY}
+      - SONARR_API_KEY=${SONARR_API_KEY}
+      - RADARR_API_KEY=${RADARR_API_KEY}
     volumes:
       - ./recyclarr:/config
 
@@ -295,6 +296,7 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+
   # Deemix
   deemix:
     image: registry.gitlab.com/bockiii/deemix-docker:latest
