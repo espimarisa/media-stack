@@ -41,12 +41,13 @@
 
     - Caddy:
         icon: caddy
-        ping: caddy
+        ping: localhost:2019
         container: caddy
         server: my-docker
         showStats: true
         widget:
           type: caddy
+          url: localhost:2019
           fields: ["upstreams", "requests", "requests_failed"]
 
 - Indexers:
@@ -60,7 +61,7 @@
         widget:
           type: sonarr
           fields: ["wanted", "queued"]
-          url: "{{HOMEPAGE_VAR_SONARR_PUBLISHED_URL}}"
+          url: sonarr
           key: "{{HOMEPAGE_VAR_SONARR_API_KEY}}"
 
     - Radarr:
@@ -73,7 +74,7 @@
         widget:
           type: radarr
           fields: ["wanted", "missing", "queued"]
-          url: "{{HOMEPAGE_VAR_RADARR_PUBLISHED_URL}}"
+          url: radarr
           key: "{{HOMEPAGE_VAR_RADARR_API_KEY}}"
 
     - Lidarr:
@@ -86,7 +87,7 @@
         widget:
           type: lidarr
           fields: ["wanted", "queued", "artists"]
-          url: "{{HOMEPAGE_VAR_LIDARR_PUBLISHED_URL}}"
+          url: lidarr
           key: "{{HOMEPAGE_VAR_LIDARR_API_KEY}}"
 
     - Readarr:
@@ -99,7 +100,7 @@
         widget:
           type: readarr
           fields: ["wanted", "queued", "books"]
-          url: "{{HOMEPAGE_VAR_READARR_PUBLISHED_URL}}"
+          url: readarr
           key: "{{HOMEPAGE_VAR_READARR_API_KEY}}"
 
     - Prowlarr:
@@ -112,7 +113,7 @@
         widget:
           type: prowlarr
           fields: ["numberOfGrabs", "numberOfQueries", "numberOfFailGrabs", "numberOfFailQueries"]
-          url: "{{HOMEPAGE_VAR_PROWLARR_PUBLISHED_URL}}"
+          url: prowlarr
           key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
 
 - Downloaders:
@@ -126,7 +127,7 @@
         widget:
           type: qbittorrent
           fields: ["leech", "seed", "download", "upload"]
-          url: "{{HOMEPAGE_VAR_QBITTORRENT_PUBLISHED_URL}}"
+          url: qbittorrentvpn
           username: "{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}"
           password: "{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}"
 

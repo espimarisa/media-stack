@@ -32,6 +32,10 @@ services:
       - ./caddy/config:/config
       - ./caddy/data:/data
       - ./caddy/sites:/srv
+    ports:
+      - 80:80
+      - 443:443
+      - 2019:2019
 
   # Redis
   redis:
