@@ -147,7 +147,7 @@ services:
       - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT} # qBittorrent WebUI Port
       - ${PRIVOXY_PORT}:${PRIVOXY_PORT} # Privoxy Port
 
-  # Radarr
+  # RADARR_API_KEY
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
