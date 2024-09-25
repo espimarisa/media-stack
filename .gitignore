@@ -2,6 +2,7 @@ qbittorrent-vpn/*
 !qbittorrent-vpn/hardlinks.py
 caddy/*
 *.sqlite
+homarr/*
 
 # Binaries and archives
 *.jar
