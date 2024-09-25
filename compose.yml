@@ -126,6 +126,16 @@ services:
     restart: unless-stopped
     privileged: true # Required
     networks: [globalNetwork, downloadNetwork]
+    environment:
+      - DASHDOT_WIDGET_LIST=os,cpu,ram,gpu,storage,network
+      - DASHDOT_SHOW_HOST=true
+      - DASHDOT_ALWAYS_SHOW_PERCENTAGES=true
+      - DASHDOT_ENABLE_CPU_TEMPS=true # Disable if you lack access to temps
+      - DASHDOT_OS_WIDGET_GROW=2
+      - DASHDOT_CPU_WIDGET_GROW=2.5
+      - DASHDOT_STORAGE_WIDGET_GROW=2.5
+      - DASHDOT_RAM_WIDGET_GROW=2
+      - DASHDOT_ACCEPT_OOKLA_EULA=true
     volumes:
       - /:/mnt/host:ro # Mount host, RO
     ports:
