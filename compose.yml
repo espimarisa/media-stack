@@ -141,6 +141,7 @@ services:
       - DASHDOT_RAM_WIDGET_GROW=2.5
       - DASHDOT_ACCEPT_OOKLA_EULA=true
       - DASHDOT_CUSTOM_HOST=${DASHDOT_CUSTOM_HOST}
+      - DASHDOT_PAGE_TITLE=${DASHDOT_PAGE_TITLE}
     volumes:
       - /:/mnt/host:ro # Mount host, RO
     ports:
