@@ -29,7 +29,7 @@ services:
       - DASHDOT_PUBLISHED_URL=${DASHDOT_PUBLISHED_URL}
       - SEARXNG_PORT=${SEARXNG_PORT}
       - JELLYFIN_PORT=${JELLYFIN_HTTP_PORT}
-      - HOMARR_PORT=${HOMARR_HPORT}
+      - HOMARR_PORT=${HOMARR_PORT}
       - DASHDOT_PORT=${DASHDOT_PORT}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
