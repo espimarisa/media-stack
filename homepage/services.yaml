@@ -41,13 +41,13 @@
 
     - Caddy:
         icon: caddy
-        ping: localhost:2019
+        ping: host.docker.internal:2019
         container: caddy
         server: my-docker
         showStats: true
         widget:
           type: caddy
-          url: localhost:2019
+          url: host.docker.internal:2019
           fields: ["upstreams", "requests", "requests_failed"]
 
 - Indexers:
@@ -61,7 +61,7 @@
         widget:
           type: sonarr
           fields: ["wanted", "queued"]
-          url: sonarr
+          url: http://sonarr
           key: "{{HOMEPAGE_VAR_SONARR_API_KEY}}"
 
     - Radarr:
