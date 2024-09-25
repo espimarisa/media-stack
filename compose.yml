@@ -129,7 +129,7 @@ services:
     volumes:
       - /:/mnt/host:ro # Mount host, RO
     ports:
-      - ${DASHDOT_PORT}:${DASHDOT_PORT} # Homarr WebUI port
+      - 80:${DASHDOT_PORT} # Homarr WebUI port
     deploy:
       resources:
         reservations:
