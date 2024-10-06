@@ -153,7 +153,7 @@ services:
       - lidarr:/config
       - deemix:/config_deemix
       - ${DOWNLOAD_DIRECTORY}/deemix:/downloads # Point this to your deemix download directory
-      - ${MEDIALIBRARY_DIRECTORY}:/music # Point this to your music directory
+      - ${MEDIALIBRARY_DIRECTORY}/music:/music # Point this to your music directory
     ports:
       - ${LIDARR_PORT}:${LIDARR_PORT} # Lidarr WebUI port
       - ${DEEMIX_PORT}:${DEEMIX_PORT} # Deemix WebUI port
