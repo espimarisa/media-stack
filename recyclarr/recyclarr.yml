@@ -1,7 +1,7 @@
 sonarr:
   web-1080p-v4:
-    base_url: ${SONARR_PUBLISHED_URL} # Set this to your Sonarr URL
-    api_key: ${SONARR_API_KEY} # Set this to your Sonarr API key
+    base_url: !env_var SONARR_PUBLISHED_URL # Set this to your Sonarr URL
+    api_key: !env_var SONARR_API_KEY # Set this to your Sonarr API key
     delete_old_custom_formats: true
     replace_existing_custom_formats: true
     include:
@@ -74,8 +74,8 @@ sonarr:
 # Configuration specific to Radarr.
 radarr:
   uhd-bluray-web:
-    base_url: ${RADARR_PUBLISHED_URL} # Set this to your Radarr url
-    api_key: ${RADARR_API_KEY} # Set this to your Radarr API key
+    base_url: !env_var RADARR_PUBLISHED_URL # Set this to your Radarr URL
+    api_key: !env_var RADARR_API_KEY # Set this to your Radarr API key
     delete_old_custom_formats: true
     replace_existing_custom_formats: true
     include:

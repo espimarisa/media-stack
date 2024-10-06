@@ -3,11 +3,6 @@
   reverse_proxy localhost:11000
 }
 
-# SearxNG
-{$SEARXNG_PUBLISHED_URL}:443 {
-  reverse_proxy localhost:{$SEARXNG_PORT}
-}
-
 # Jellyfin
 {$JELLYFIN_PUBLISHED_URL}:443 {
   reverse_proxy localhost:{$JELLYFIN_PORT}
@@ -16,9 +11,4 @@
 # Homarr
 {$HOMARR_PUBLISHED_URL}:443 {
   reverse_proxy localhost:{$HOMARR_PORT}
-}
-
-# Dash
-{$DASHDOT_PUBLISHED_URL}:443 {
-  reverse_proxy localhost:{$DASHDOT_PORT}
 }

@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # Creates volumes
-docker volume create redis-volume
 docker volume create nextcloud_aio_mastercontainer
-docker volume create searxng-volume
 docker volume create homarr-volume
 docker volume create qbittorrentvpn-volume
 docker volume create radarr-volume
