@@ -155,9 +155,11 @@ services:
       - UMASK=${GLOBAL_UMASK}
     volumes:
       - lidarr:/config
-      - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory
+      - deemix:/config_deemix
+      - ${DOWNLOAD_DIRECTORY}/deemix:/downloads # Point this to your deemix download directory
+      - ${MEDIA_DIRECTORY}:/music # Point this to your music directory
     ports:
-      - ${LIDARR_PORT}:${LIDARR_PORT} # Sonarr WebUI port
+      - ${LIDARR_PORT}:${LIDARR_PORT} # Lidarr WebUI port
 
   # Readarr
   readarr:
@@ -249,20 +251,6 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-
-  # Deemix
-  deemix:
-    image: registry.gitlab.com/bockiii/deemix-docker:latest
-    container_name: deemix
-    restart: unless-stopped
-    networks: [globalNetwork]
-    environment:
-      - DEEMIX_SINGLE_USER=true # Allows one global user login. Set to false if you wish for all users to provide their own config/ARL
-    volumes:
-      - deemix:/config
-      - ${MEDIALIBRARY_DIRECTORY}/music:/downloads # Point this to where you want to download music to
-    ports:
-      - ${DEEMIX_PORT}:${DEEMIX_PORT} # Deemix WebUI port
 
 volumes:
   nextcloud_aio_mastercontainer:
