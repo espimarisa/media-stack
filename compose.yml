@@ -17,10 +17,6 @@ services:
       - ./caddy/config:/config
       - ./caddy/data:/data
       - ./caddy/sites:/srv
-    ports:
-      - 80:80
-      - 443:443
-      - 2019:2019
 
   # NextCloud AIO
   nextcloud-aio-mastercontainer:
@@ -143,7 +139,7 @@ services:
 
   # Lidarr
   lidarr:
-    image: lscr.io/linuxserver/lidarr:latest
+    image: youegraillot/lidarr-on-steroids:latest
     container_name: lidarr
     restart: unless-stopped
     networks: [globalNetwork, downloadNetwork]
