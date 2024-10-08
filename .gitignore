@@ -3,6 +3,7 @@ qbittorrent-vpn/*
 caddy/*
 *.sqlite
 homarr/*
+thelounge/*
 
 # Binaries and archives
 *.jar
