@@ -12,6 +12,7 @@ docker volume create readarr-volume
 docker volume create recyclarr-volume
 docker volume create jellyfin-volume
 docker volume create deemix-volume
+docker volume create thelounge-volume
 
 # Creates network
 docker network create global-network
