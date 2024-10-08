@@ -258,7 +258,7 @@ services:
     ports:
       - 9000:9000
     volumes:
-      - thelounge:/var/opt/thelounge
+      - ./thelounge:/var/opt/thelounge
 
 volumes:
   nextcloud_aio_mastercontainer:
@@ -285,9 +285,6 @@ volumes:
   deemix:
     external: true
     name: deemix-volume
-  thelounge:
-    external: true
-    name: thelounge-volume
 
 networks:
   globalNetwork:
