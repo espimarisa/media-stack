@@ -12,3 +12,8 @@
 {$HOMARR_PUBLISHED_URL}:443 {
   reverse_proxy localhost:{$HOMARR_PORT}
 }
+
+# TheLounge
+{$THELOUNGE_PUBLISHED_URL}:443 {
+  reverse_proxy localhost:{$THELOUNGE_PORT}
+}
