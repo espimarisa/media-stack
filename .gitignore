@@ -4,6 +4,7 @@ caddy/*
 *.sqlite
 homarr/*
 thelounge/*
+.ssl/
 
 # Binaries and archives
 *.jar

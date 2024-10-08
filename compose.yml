@@ -261,6 +261,7 @@ services:
       - ${THELOUNGE_PORT}:${THELOUNGE_PORT}
     volumes:
       - ./thelounge:/var/opt/thelounge
+      - ./ssl:/ssl
 
 volumes:
   nextcloud_aio_mastercontainer:
