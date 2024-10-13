@@ -12,6 +12,8 @@ docker volume create readarr-volume
 docker volume create recyclarr-volume
 docker volume create jellyfin-volume
 docker volume create deemix-volume
+docker volume create calibre-volume
+docker volume create calibreweb-volume
 
 # Creates network
 docker network create global-network

@@ -220,6 +220,50 @@ services:
     ports:
       - ${FLARESOLVERR_PORT}:${FLARESOLVERR_PORT} # Flaresolverr API Port
 
+  # Calibre
+  calibre:
+    image: lscr.io/linuxserver/calibre:latest
+    container_name: calibre
+    restart: unless-stopped
+    networks: [globalNetwork]
+    security_opt: [seccomp:unconfined]
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+      - CUSTOM_PORT=${CALIBRE_HTTP_PORT}
+      - CUSTOM_HTTPS_PORT=${CALIBRE_HTTPS_PORT}
+      - CUSTOM_USER=${CALIBRE_READER}
+      - CUSTOM_PASSWORD=${CALIBRE_PASSWORD}
+    volumes:
+      - calibre:/calibre
+      - ${MEDIA_DIRECTORY}/books:/books
+      - ${MEDIA_DIRECTORY}/manga:/manga
+      - ${MEDIA_DIRECTORY}/audiobooks:/audiobooks
+    ports:
+      - ${CALIBRE_HTTP_PORT}:${CALIBRE_HTTP_PORT}
+      - ${CALIBRE_HTTPS_PORT}:${CALIBRE_HTTPS_PORT}
+
+  # Calibre web
+  calibre-web:
+    image: lscr.io/linuxserver/calibre-web:latest
+    container_name: calibre-web
+    restart: unless-stopped
+    networks: [globalNetwork]
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+      - DOCKER_MODS=linuxserver/mods:universal-calibre
+      - OAUTHLIB_RELAX_TOKEN_SCOPE=1
+    volumes:
+      - calibre-web:/config
+      - calibre:/calibre
+    ports:
+      - ${CALIBRE_WEB_PORT}:${CALIBRE_WEB_PORT}
+
   # JellyFin
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
@@ -282,6 +326,12 @@ volumes:
   prowlarr:
     external: true
     name: prowlarr-volume
+  calibre:
+    external: true
+    name: calibre-volume
+  calibre-web:
+    external: true
+    name: calibreweb-volume
   jellyfin:
     external: true
     name: jellyfin-volume

@@ -6,7 +6,7 @@ from time import sleep
 path = sys.argv[1]
 category = sys.argv[2]
 
-allowed_categories = ["anime", "anime-movies", "tv", "movies", "manga", "comics", "music", "roms", "isos", "software"] # Categories to create hardlinks for
+allowed_categories = ["anime", "anime-movies", "tv", "movies", "manga", "comics", "music", "roms", "isos", "software", "books", "audiobooks"] # Categories to create hardlinks for
 
 if category not in allowed_categories:
     exit()
@@ -22,6 +22,8 @@ dest_folders = [
   "/storage/roms", # Internal container path to your roms library
   "/storage/isos", # Internal container path to your isos library
   "/storage/software" # Internal container path to your software library
+  "/storage/medialibrary/books" # Internal container path to your book library
+  "/storage/medialibrary/audiobooks" # Internal container path to your audiobook library
 ]
 
 # Creates some hardlinks
