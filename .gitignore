@@ -14,6 +14,7 @@ thelounge/*
 *.tar
 *.gz
 *.zip
+./calibre-web
 
 # Lockfiles for other package managers
 yarn.lock
