@@ -236,8 +236,8 @@ services:
       - CUSTOM_USER=${CALIBRE_USER}
       - CUSTOM_PASSWORD=${CALIBRE_PASSWORD}
     volumes:
-      - ./calibre-web:/config
-      - ${STORAGE_DIRECTORY}/calibre-db.db:/calibre-db
+      - calibre-web:/config
+      - ${STORAGE_DIRECTORY}/calibre:/calibre-db
     ports:
       - ${CALIBRE_WEB_PORT}:${CALIBRE_WEB_PORT}
 
