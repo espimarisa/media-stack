@@ -234,13 +234,13 @@ services:
       - UMASK=${GLOBAL_UMASK}
       - CUSTOM_PORT=${CALIBRE_HTTP_PORT}
       - CUSTOM_HTTPS_PORT=${CALIBRE_HTTPS_PORT}
-      - CUSTOM_USER=${CALIBRE_READER}
+      - CUSTOM_USER=${CALIBRE_USER}
       - CUSTOM_PASSWORD=${CALIBRE_PASSWORD}
     volumes:
       - calibre:/calibre
-      - ${MEDIA_DIRECTORY}/books:/books
-      - ${MEDIA_DIRECTORY}/manga:/manga
-      - ${MEDIA_DIRECTORY}/audiobooks:/audiobooks
+      - ${MEDIALIBRARY_DIRECTORY}/books:/books
+      - ${MEDIALIBRARY_DIRECTORY}/manga:/manga
+      - ${MEDIALIBRARY_DIRECTORY}/audiobooks:/audiobooks
     ports:
       - ${CALIBRE_HTTP_PORT}:${CALIBRE_HTTP_PORT}
       - ${CALIBRE_HTTPS_PORT}:${CALIBRE_HTTPS_PORT}
