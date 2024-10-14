@@ -227,7 +227,7 @@ services:
     image: lscr.io/linuxserver/kavita:latest
     container_name: kavita
     restart: unless-stopped
-    networks: [globalnetwork]
+    networks: [globalNetwork]
     volumes:
       - kavita:/config
       - ${MEDIALIBRARY_DIRECTORY}:/data
