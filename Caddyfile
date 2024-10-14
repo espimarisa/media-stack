@@ -18,7 +18,7 @@
   reverse_proxy localhost:{$THELOUNGE_PORT}
 }
 
-# CalibreWeb
-{$CALIBREWEB_PUBLISHED_URL}:443 {
-  reverse_proxy localhost:{$CALIBREWEB_PORT}
+# Kavita
+{$KAVITA_PUBLISHED_URL}:443 {
+  reverse_proxy localhost:{$KAVITA_PORT}
 }
