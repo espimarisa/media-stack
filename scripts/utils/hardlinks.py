@@ -9,7 +9,7 @@ category = sys.argv[2]
 allowed_categories = [
   "anime",
   "anime-movies",
-  "audiobooks"
+  "audiobooks",
   "books",
   "comics",
   "isos",
@@ -18,7 +18,7 @@ allowed_categories = [
   "music",
   "roms",
   "software",
-  "tv",
+  "tv"
 ]
 
 if category not in allowed_categories:
@@ -36,7 +36,7 @@ allowed_folders = [
   "music",
   "roms",
   "software",
-  "tv",
+  "tv"
 ]
 
 dest_folders = [
