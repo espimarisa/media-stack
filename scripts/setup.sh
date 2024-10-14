@@ -14,11 +14,13 @@ docker volume create jellyfin-volume
 docker volume create deemix-volume
 docker volume create kavita-volume
 
-
 # Creates network
 docker network create global-network
 docker network create download-network
 
 # Makes a temporary wireguard config
+mkdir qbittorrent-vpn
 touch qbittorrent-vpn/wireguard/wg0.conf
+
+# Makes initial thelounge directory
 mkdir thelounge
