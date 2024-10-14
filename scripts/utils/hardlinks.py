@@ -27,7 +27,7 @@ if category not in allowed_categories:
 allowed_folders = [
   "anime",
   "anime-movies",
-  "audiobooks"
+  "audiobooks",
   "books",
   "comics",
   "isos",
