@@ -93,12 +93,14 @@ services:
       - PUID=${GLOBAL_PUID}
       - PGID=${GLOBAL_PGID}
       - UMASK=${GLOBAL_UMASK}
+      - VPN_USER=${VPN_USER}
+      - VPN_PASS=${VPN_PASS}
       - VPN_INPUT_PORTS=${DEEMIX_PORT},${LIDARR_PORT},${SONARR_PORT},${RADARR_PORT},${PROWLARR_PORT}
       - VPN_OUTPUT_PORTS=${DEEMIX_PORT},${LIDARR_PORT},${SONARR_PORT},${RADARR_PORT},${PROWLARR_PORT}
     volumes:
       - qbittorrentvpn:/config
       - ${PWD}/scripts/utils/hardlinks.py:/config/qBittorrent/hardlinks.py # Pass hardlinks script into container
-      - ${PWD}/wg0.conf:/config/wireguard/wg0.conf # WireGuard config file
+      # - ${PWD}/wg0.conf:/config/wireguard/wg0.conf # WireGuard config file. manually create at /var/lib/docker/volumes/qbittorrent-vpn/_data/wireguard/wg0.conf
       - ${STORAGE_DIRECTORY}:/storage
       - /lib/modules:/lib/modules
     ports:
