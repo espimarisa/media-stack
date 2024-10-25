@@ -1,10 +1,5 @@
-qbittorrent-vpn/*
-!qbittorrent-vpn/hardlinks.py
-caddy/*
 *.sqlite
-homarr/*
-thelounge/*
-.ssl/
+wg0.conf
 
 # Binaries and archives
 *.jar

@@ -1,5 +1,5 @@
 services:
-  # Caddy
+  # caddy: reverse proxy
   caddy:
     image: caddy:alpine
     container_name: caddy
@@ -13,16 +13,14 @@ services:
       - HOMARR_PORT=${HOMARR_PORT}
       - THELOUNGE_PORT=${THELOUNGE_PORT}
       - THELOUNGE_PUBLISHED_URL=${THELOUNGE_PUBLISHED_URL}
-      - KAVITA_PORT=${KAVITA_PORT}
-      - KAVITA_PUBLISHED_URL=${KAVITA_PUBLISHED_URL}
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./caddy/certs:/certs
-      - ./caddy/config:/config
-      - ./caddy/data:/data
-      - ./caddy/sites:/srv
+      - ${PWD}/Caddyfile:/etc/caddy/Caddyfile
+      - caddy:/certs
+      - caddy:/config
+      - caddy:/data
+      - caddy:/srv
 
-  # NextCloud AIO
+  # nextcloud: file hosting and drive
   nextcloud-aio-mastercontainer:
     image: nextcloud/all-in-one:latest
     container_name: nextcloud-aio-mastercontainer
@@ -37,19 +35,19 @@ services:
       - NEXTCLOUD_MEMORY_LIMIT=8096M # Memory limit, lower if a problem
       - NEXTCLOUD_ENABLE_DRI_DEVICE=true # Disable if /dev/dri doesn't exist
     volumes:
-        - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
-        - ${STORAGE_DIRECTORY}/nextcloud:/data # Set to where you store your NextCloud data
-        - /var/run/docker.sock:/var/run/docker.sock:ro
+      - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
+      - ${STORAGE_DIRECTORY}/nextcloud:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-        - 8080:8080
-        - 8443:8443
+      - 8080:8080 # NextCloud HTTP Port
+      - 8443:8443 # NextCloud HTTPS Port
 
-  # Cloudflare-ddns
+  # cloudflare-ddns: cloudflare dns updater
   cloudflare-ddns:
     image: favonia/cloudflare-ddns:latest
     container_name: cloudflare-ddns
     restart: always
-    network_mode: host # Docker requires network_mode be set to host in order to access the IPv6 public address
+    network_mode: host
     read_only: true
     cap_drop: [all]
     security_opt: [no-new-privileges:true]
@@ -58,7 +56,7 @@ services:
       - DOMAINS=${CF_DOMAINS}
       - PROXIED=${CF_PROXIED}
 
-  # Homarr
+  # homarr: home page
   homarr:
     image: ghcr.io/ajnart/homarr:latest
     container_name: homarr
@@ -66,28 +64,26 @@ services:
     networks: [globalNetwork, downloadNetwork]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./homarr/configs:/app/data/configs
-      - ./homarr/icons:/app/public/icons
-      - ./homarr/data:/data
+      - homarr:/app/data/configs
+      - homarr:/app/public/icons
+      - homarr:/data
     ports:
       - ${HOMARR_PORT}:${HOMARR_PORT} # Homarr WebUI port
 
-  # qBittorrent
+  # qbittorrentvpn: torrent client
   qbittorrentvpn:
     image: binhex/arch-qbittorrentvpn:latest
     container_name: qbittorrentvpn
     restart: unless-stopped
-    privileged: true # Required for WireGuard
+    privileged: true
     networks: [downloadNetwork]
     cap_add: [NET_ADMIN]
     sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1 # Required for WireGuard
+      - net.ipv4.conf.all.src_valid_mark=1
     environment:
       - VPN_ENABLED=yes
       - VPN_CLIENT=${VPN_CLIENT}
       - VPN_PROV=${VPN_PROV}
-      - VPN_USER=${VPN_USER}
-      - VPN_PASS=${VPN_PASS}
       - STRICT_PORT_FORWARDING=yes
       - NAME_SERVERS=94.140.14.14,94.140.15.15,2a10:50c0::ad1:ff,2a10:50c0::ad2:ff # AdGuard Public DNS
       - LAN_NETWORK=${LAN_NETWORK}
@@ -97,20 +93,24 @@ services:
       - PUID=${GLOBAL_PUID}
       - PGID=${GLOBAL_PGID}
       - UMASK=${GLOBAL_UMASK}
+      - VPN_INPUT_PORTS=${DEEMIX_PORT},${LIDARR_PORT},${SONARR_PORT},${RADARR_PORT},${PROWLARR_PORT}
+      - VPN_OUTPUT_PORTS=${DEEMIX_PORT},${LIDARR_PORT},${SONARR_PORT},${RADARR_PORT},${PROWLARR_PORT}
     volumes:
-      - ./qbittorrent-vpn/config:/config
+      - qbittorrentvpn:/config
+      - ${PWD}/scripts/utils/hardlinks.py:/config/qBittorrent/hardlinks.py # Pass hardlinks script into container
+      - ${PWD}/wg0.conf:/config/wireguard/wg0.conf # WireGuard config file
       - ${STORAGE_DIRECTORY}:/storage
       - /lib/modules:/lib/modules
     ports:
       - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT} # qBittorrent WebUI Port
       - ${PRIVOXY_PORT}:${PRIVOXY_PORT} # Privoxy Port
 
-  # Radarr
+  # radarr: pvr for movies
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     restart: unless-stopped
-    networks: [globalNetwork, downloadNetwork]
+    networks: [downloadNetwork]
     depends_on: [qbittorrentvpn, flaresolverr]
     environment:
       - TZ=${GLOBAL_TZ}
@@ -119,16 +119,17 @@ services:
       - UMASK=${GLOBAL_UMASK}
     volumes:
       - radarr:/config
-      - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory
+      - ${DOWNLOAD_DIRECTORY}:/downloads
+      - ${STORAGE_DIRECTORY}:/storage
     ports:
       - ${RADARR_PORT}:${RADARR_PORT} # Radarr WebUI port
 
-  # Sonarr
+  # sonarr: pvr for tv shows/anime
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     restart: unless-stopped
-    networks: [globalNetwork, downloadNetwork]
+    networks: [downloadNetwork]
     depends_on: [qbittorrentvpn, flaresolverr]
     environment:
       - TZ=${GLOBAL_TZ}
@@ -137,16 +138,17 @@ services:
       - UMASK=${GLOBAL_UMASK}
     volumes:
       - sonarr:/config
-      - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory
+      - ${DOWNLOAD_DIRECTORY}:/downloads
+      - ${STORAGE_DIRECTORY}:/storage
     ports:
       - ${SONARR_PORT}:${SONARR_PORT} # Sonarr WebUI port
 
-  # Lidarr
+  # lidarr: pvr for music
   lidarr:
-    image: youegraillot/lidarr-on-steroids:latest
+    image: ghcr.io/hotio/lidarr:pr-plugins
     container_name: lidarr
     restart: unless-stopped
-    networks: [globalNetwork, downloadNetwork]
+    networks: [downloadNetwork]
     depends_on: [qbittorrentvpn, flaresolverr]
     environment:
       - TZ=${GLOBAL_TZ}
@@ -155,38 +157,18 @@ services:
       - UMASK=${GLOBAL_UMASK}
     volumes:
       - lidarr:/config
-      - deemix:/config_deemix
-      - ${DOWNLOAD_DIRECTORY}/deemix:/downloads # Point this to your deemix download directory
-      - ${MEDIALIBRARY_DIRECTORY}/music:/music # Point this to your music directory
+      - ${DOWNLOAD_DIRECTORY}:/downloads
+      - ${STORAGE_DIRECTORY}:/storage
     ports:
       - ${LIDARR_PORT}:${LIDARR_PORT} # Lidarr WebUI port
-      - ${DEEMIX_PORT}:${DEEMIX_PORT} # Deemix WebUI port
 
-  # Readarr
-  readarr:
-    image: lscr.io/linuxserver/readarr:develop
-    container_name: readarr
-    restart: unless-stopped
-    networks: [globalNetwork, downloadNetwork]
-    depends_on: [qbittorrentvpn, flaresolverr]
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-    volumes:
-      - readarr:/config
-      - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory
-    ports:
-      - ${READARR_PORT}:${READARR_PORT} # Readarr WebUI port
-
-  # Prowlarr
+  # prowlarr: pvr indexer
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     restart: unless-stopped
-    networks: [globalNetwork, downloadNetwork]
-    depends_on: [qbittorrentvpn, radarr, sonarr, lidarr, readarr, flaresolverr]
+    networks: [downloadNetwork]
+    depends_on: [qbittorrentvpn, radarr, sonarr, lidarr, flaresolverr]
     environment:
       - TZ=${GLOBAL_TZ}
       - PUID=${GLOBAL_PUID}
@@ -194,52 +176,46 @@ services:
       - UMASK=${GLOBAL_UMASK}
     volumes:
       - prowlarr:/config
-      - ${STORAGE_DIRECTORY}:/storage # Point this to your storage/media directory
+      - ${DOWNLOAD_DIRECTORY}:/downloads
+      - ${STORAGE_DIRECTORY}:/storage
     ports:
       - ${PROWLARR_PORT}:${PROWLARR_PORT} # Prowlarr WebUI port
 
-  # Recyclarr
+  # recyclarr: 'arr config manager
   recyclarr:
     image: ghcr.io/recyclarr/recyclarr:latest
     container_name: recyclarr
     restart: unless-stopped
-    networks: [globalNetwork]
-    depends_on: [qbittorrentvpn, radarr, sonarr, prowlarr]
-    environment:
-      - SONARR_API_KEY=${SONARR_API_KEY}
-      - RADARR_API_KEY=${RADARR_API_KEY}
-    volumes:
-      - ./recyclarr:/config
-
-  # Flaresolverr
-  flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    container_name: flaresolverr
-    restart: unless-stopped
-    networks: [globalNetwork]
-    cap_drop: [all]
-    security_opt: [no-new-privileges:true]
-    ports:
-      - ${FLARESOLVERR_PORT}:${FLARESOLVERR_PORT} # Flaresolverr API Port
-
-  # Kavita
-  kavita:
-    image: lscr.io/linuxserver/kavita:latest
-    container_name: kavita
-    restart: unless-stopped
-    networks: [globalNetwork]
-    volumes:
-      - kavita:/config
-      - ${MEDIALIBRARY_DIRECTORY}:/data
-    ports:
-      - ${KAVITA_PORT}:${KAVITA_PORT}
+    networks: [downloadNetwork]
+    depends_on: [radarr, sonarr]
     environment:
       - TZ=${GLOBAL_TZ}
       - PUID=${GLOBAL_PUID}
       - PGID=${GLOBAL_PGID}
       - UMASK=${GLOBAL_UMASK}
+      - SONARR_API_KEY=${SONARR_API_KEY}
+      - RADARR_API_KEY=${RADARR_API_KEY}
+    volumes:
+      - recyclarr:/config
+      - ${PWD}/recyclarr/recyclarr.yml:/config/recyclarr.yml # Pass recyclarr config file
 
-  # Jellyfin
+  # flaresolverr: cloudflare captcha bypasser
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    networks: [downloadNetwork]
+    cap_drop: [all]
+    security_opt: [no-new-privileges:true]
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+    ports:
+      - ${FLARESOLVERR_PORT}:${FLARESOLVERR_PORT} # Flaresolverr API Port
+
+  # jellyfin: media client
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
@@ -270,22 +246,61 @@ services:
               count: 1
               capabilities: [gpu]
 
-  # TheLounge
+  # thelounge: irc client
   thelounge:
-    image: ghcr.io/thelounge/thelounge:latest
+    image: lscr.io/linuxserver/thelounge:latest
     container_name: thelounge
     restart: unless-stopped
     networks: [globalNetwork]
     ports:
       - ${THELOUNGE_PORT}:${THELOUNGE_PORT}
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
     volumes:
-      - ./thelounge:/var/opt/thelounge
-      - ./ssl:/ssl
+      - thelounge:/config
+
+  # deemix: music downloader
+  deemix:
+    image: codefaux/deemix-for-lidarr:latest
+    container_name: deemix
+    restart: unless-stopped
+    networks: [downloadNetwork]
+    ports:
+      - ${DEEMIX_PORT}:${DEEMIX_PORT}
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+    volumes:
+      - ${DOWNLOAD_DIRECTORY}:/downloads
+      - deemix:/deemix-gui/config
+
+  # lidarr-deemix: lidarr deemix enrichment
+  lidarr-deemix:
+    image: ghcr.io/ad-on-is/lidarr-deemix:latest
+    container_name: lidarr-deemix
+    restart: unless-stopped
+    networks: [downloadNetwork]
+    environment:
+      - DEEMIX_ARL=${DEEMIX_ARL}
 
 volumes:
+  caddy:
+    external: true
+    name: caddy-volume
   nextcloud_aio_mastercontainer:
     external: true
     name: nextcloud_aio_mastercontainer
+  homarr:
+    external: true
+    name: homarr-volume
+  qbittorrentvpn:
+    external: true
+    name: qbittorrentvpn-volume
   radarr:
     external: true
     name: radarr-volume
@@ -295,18 +310,18 @@ volumes:
   lidarr:
     external: true
     name: lidarr-volume
-  readarr:
-    external: true
-    name: readarr-volume
   prowlarr:
     external: true
     name: prowlarr-volume
-  kavita:
+  recyclarr:
     external: true
-    name: kavita-volume
+    name: recyclarr-volume
   jellyfin:
     external: true
     name: jellyfin-volume
+  thelounge:
+    external: true
+    name: thelounge-volume
   deemix:
     external: true
     name: deemix-volume
@@ -316,7 +331,10 @@ networks:
     external: true
     driver: bridge
     name: global-network
+    enable_ipv6: false
+
   downloadNetwork:
     external: true
     driver: bridge
     name: download-network
+    enable_ipv6: false
