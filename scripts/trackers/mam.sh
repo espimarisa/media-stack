@@ -4,7 +4,7 @@
 mam_id=$MAM_ID
 
 # Put the global path to the appdata folder of the docker container
-docker_appdata_global_path="uh"
+docker_appdata_global_path="/config" # This may or may not be correct
 
 # Only rename if your container name is different to the appdata folder name ^^^
 container_name="qbittorrentvpn"
