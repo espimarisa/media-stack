@@ -14,7 +14,7 @@ services:
       - THELOUNGE_PORT=${THELOUNGE_PORT}
       - THELOUNGE_PUBLISHED_URL=${THELOUNGE_PUBLISHED_URL}
     volumes:
-      - ${PWD}/Caddyfile:/etc/caddy/Caddyfile
+      - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy:/certs
       - caddy:/config
       - caddy:/data
@@ -56,166 +56,96 @@ services:
       - DOMAINS=${CF_DOMAINS}
       - PROXIED=${CF_PROXIED}
 
-  # homarr: home page
-  homarr:
-    image: ghcr.io/ajnart/homarr:latest
-    container_name: homarr
-    restart: unless-stopped
-    networks: [globalNetwork, downloadNetwork]
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - homarr:/app/data/configs
-      - homarr:/app/public/icons
-      - homarr:/data
-    ports:
-      - ${HOMARR_PORT}:${HOMARR_PORT} # Homarr WebUI port
-
-  # qbittorrentvpn: torrent client
-  qbittorrentvpn:
-    image: binhex/arch-qbittorrentvpn:latest
-    container_name: qbittorrentvpn
+  # gluetun: vpn client (protonvpn)
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
     restart: unless-stopped
     privileged: true
-    networks: [downloadNetwork]
-    cap_add: [NET_ADMIN]
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
+    cap_add:
+      - NET_ADMIN
     environment:
-      - VPN_ENABLED=yes
-      - VPN_CLIENT=${VPN_CLIENT}
-      - VPN_PROV=${VPN_PROV}
-      - STRICT_PORT_FORWARDING=yes
-      - NAME_SERVERS=94.140.14.14,94.140.15.15,2a10:50c0::ad1:ff,2a10:50c0::ad2:ff # AdGuard Public DNS
-      - LAN_NETWORK=${LAN_NETWORK}
-      - ENABLE_PRIVOXY=yes
+      - VPN_PORT_FORWARDING=on
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_PORT_FORWARDING_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - VPN_ENDPOINT_IP=${VPN_ENDPOINT_IP}
+      - VPN_ENDPOINT_PORT=${VPN_ENDPOINT_PORT}
+      - VPN_DNS_ADDRESS=${VPN_DNS_ADDRESS}
+      - WIREGUARD_PUBLIC_KEY=${VPN_WIREGUARD_PUBLIC_KEY}
+      - WIREGUARD_PRIVATE_KEY=${VPN_WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${VPN_WIREGUARD_ADDRESSES}
+      - UPDATER_PERIOD=24h
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/16 # Internal LAN network
+    volumes:
+      - gluetun:/gluetun
+    ports:
+      - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT} # qBittorrent WebUI
+      - ${SONARR_PORT}:${SONARR_PORT} # Sonarr WebUI
+      - ${RADARR_PORT}:${RADARR_PORT} # Radarr WebUI
+      - ${LIDARR_PORT}:${LIDARR_PORT} # Lidarr WebUI
+      - ${DEEMIX_PORT}:${DEEMIX_PORT} # Deemix WebUI
+      - ${PROWLARR_PORT}:${PROWLARR_PORT} # Prowlarr WebUI
+      - ${FLARESOLVERR_PORT}:${FLARESOLVERR_PORT} # Flaresolverr API
+      - 8000:8000 # Gluetun
+
+  # qbittorrent: bittorrent client
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    network_mode: service:gluetun
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
       - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-      - VPN_USER=${VPN_USER}
-      - VPN_PASS=${VPN_PASS}
-      - VPN_INPUT_PORTS=${DEEMIX_PORT},${LIDARR_PORT},${SONARR_PORT},${RADARR_PORT},${PROWLARR_PORT}
-      - VPN_OUTPUT_PORTS=${DEEMIX_PORT},${LIDARR_PORT},${SONARR_PORT},${RADARR_PORT},${PROWLARR_PORT}
     volumes:
-      - qbittorrentvpn:/config
-      - ${PWD}/scripts/utils/hardlinks.py:/config/qBittorrent/hardlinks.py # Pass hardlinks script into container
-      # - ${PWD}/wg0.conf:/config/wireguard/wg0.conf # WireGuard config file. manually create at /var/lib/docker/volumes/qbittorrent-vpn/_data/wireguard/wg0.conf
+      - qbittorrent:/config
       - ${STORAGE_DIRECTORY}:/storage
-      - /lib/modules:/lib/modules
-    ports:
-      - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT} # qBittorrent WebUI Port
-      - ${PRIVOXY_PORT}:${PRIVOXY_PORT} # Privoxy Port
 
-  # radarr: pvr for movies
-  radarr:
-    image: lscr.io/linuxserver/radarr:latest
-    container_name: radarr
+  # qbittorrent-port-forwarder: automatic vpn port forwarding mapping for qbittorrent
+  qbittorrent-natmap:
+    image: ghcr.io/soxfor/qbittorrent-natmap:latest
+    container_name: qbittorrent-natmap
     restart: unless-stopped
-    networks: [downloadNetwork]
-    depends_on: [qbittorrentvpn, flaresolverr]
+    depends_on:
+      qbittorrent:
+        condition: service_started
+      gluetun:
+        condition: service_healthy
+    network_mode: service:gluetun
     environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
+      - QBITTORRENT_USER=${QBITTORRENT_WEBUI_USERNAME}
+      - QBITTORRENT_PASS=${QBITTORRENT_WEBUI_PASSWORD}
+      - QBITTORRENT_PORT=${QBITTORRENT_WEBUI_PORT}
+      - QBITTORRENT_SERVER=${VPN_DNS_ADDRESS}
     volumes:
-      - radarr:/config
-      - ${DOWNLOAD_DIRECTORY}:/downloads
-      - ${STORAGE_DIRECTORY}:/storage
-    ports:
-      - ${RADARR_PORT}:${RADARR_PORT} # Radarr WebUI port
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  # sonarr: pvr for tv shows/anime
-  sonarr:
-    image: lscr.io/linuxserver/sonarr:latest
-    container_name: sonarr
-    restart: unless-stopped
-    networks: [downloadNetwork]
-    depends_on: [qbittorrentvpn, flaresolverr]
+  # seedboxapi: automatically set seedbox api for trackers (MAM)
+  # If you are not using myanonamouse, you may safely remove this container
+  seedboxapi:
+    image: myanonamouse/seedboxapi:latest
+    container_name: seedboxapi
+    network_mode: service:gluetun
+    depends_on:
+      qbittorrent:
+        condition: service_started
+      gluetun:
+        condition: service_healthy
     environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
+      - DEBUG=1
+      - interval=1 # Check every minute
+      - mam_id=${MAM_ID}
     volumes:
-      - sonarr:/config
-      - ${DOWNLOAD_DIRECTORY}:/downloads
-      - ${STORAGE_DIRECTORY}:/storage
-    ports:
-      - ${SONARR_PORT}:${SONARR_PORT} # Sonarr WebUI port
-
-  # lidarr: pvr for music
-  lidarr:
-    image: ghcr.io/hotio/lidarr:pr-plugins
-    container_name: lidarr
-    restart: unless-stopped
-    networks: [downloadNetwork]
-    depends_on: [qbittorrentvpn, flaresolverr]
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-    volumes:
-      - lidarr:/config
-      - ${DOWNLOAD_DIRECTORY}:/downloads
-      - ${STORAGE_DIRECTORY}:/storage
-    ports:
-      - ${LIDARR_PORT}:${LIDARR_PORT} # Lidarr WebUI port
-
-  # prowlarr: pvr indexer
-  prowlarr:
-    image: lscr.io/linuxserver/prowlarr:latest
-    container_name: prowlarr
-    restart: unless-stopped
-    networks: [downloadNetwork]
-    depends_on: [qbittorrentvpn, radarr, sonarr, lidarr, flaresolverr]
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-    volumes:
-      - prowlarr:/config
-      - ${DOWNLOAD_DIRECTORY}:/downloads
-      - ${STORAGE_DIRECTORY}:/storage
-    ports:
-      - ${PROWLARR_PORT}:${PROWLARR_PORT} # Prowlarr WebUI port
-
-  # recyclarr: 'arr config manager
-  recyclarr:
-    image: ghcr.io/recyclarr/recyclarr:latest
-    container_name: recyclarr
-    restart: unless-stopped
-    networks: [downloadNetwork]
-    depends_on: [radarr, sonarr]
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-      - SONARR_API_KEY=${SONARR_API_KEY}
-      - RADARR_API_KEY=${RADARR_API_KEY}
-    volumes:
-      - recyclarr:/config
-      - ${PWD}/recyclarr/recyclarr.yml:/config/recyclarr.yml # Pass recyclarr config file
-
-  # flaresolverr: cloudflare captcha bypasser
-  flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    container_name: flaresolverr
-    restart: unless-stopped
-    networks: [downloadNetwork]
-    cap_drop: [all]
-    security_opt: [no-new-privileges:true]
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-    ports:
-      - ${FLARESOLVERR_PORT}:${FLARESOLVERR_PORT} # Flaresolverr API Port
+      - seedboxapi:/config
 
   # jellyfin: media client
   jellyfin:
@@ -248,6 +178,155 @@ services:
               count: 1
               capabilities: [gpu]
 
+  # radarr: pvr for movies
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    depends_on:
+      qbittorrent:
+        condition: service_started
+      gluetun:
+        condition: service_healthy
+      flaresolverr:
+        condition: service_started
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+    volumes:
+      - radarr:/config
+      - ${DOWNLOAD_DIRECTORY}:/downloads
+      - ${STORAGE_DIRECTORY}:/storage
+
+  # sonarr: pvr for tv shows/anime
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    depends_on:
+      qbittorrent:
+        condition: service_started
+      gluetun:
+        condition: service_healthy
+      flaresolverr:
+        condition: service_started
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+    volumes:
+      - sonarr:/config
+      - ${DOWNLOAD_DIRECTORY}:/downloads
+      - ${STORAGE_DIRECTORY}:/storage
+
+  # lidarr: pvr for music
+  lidarr:
+    image: ghcr.io/hotio/lidarr:pr-plugins
+    container_name: lidarr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    depends_on:
+      qbittorrent:
+        condition: service_started
+      gluetun:
+        condition: service_healthy
+      flaresolverr:
+        condition: service_started
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+    volumes:
+      - lidarr:/config
+      - ${DOWNLOAD_DIRECTORY}:/downloads
+      - ${STORAGE_DIRECTORY}:/storage
+
+  # prowlarr: pvr indexer
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    depends_on:
+      qbittorrent:
+        condition: service_started
+      gluetun:
+        condition: service_healthy
+      radarr:
+        condition: service_started
+      sonarr:
+        condition: service_started
+      flaresolverr:
+        condition: service_started
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+    volumes:
+      - prowlarr:/config
+      - ${DOWNLOAD_DIRECTORY}:/downloads
+      - ${STORAGE_DIRECTORY}:/storage
+
+  # recyclarr: 'arr config manager
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:latest
+    container_name: recyclarr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    depends_on:
+      radarr:
+        condition: service_started
+      sonarr:
+        condition: service_started
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+      - SONARR_API_KEY=${SONARR_API_KEY}
+      - RADARR_API_KEY=${RADARR_API_KEY}
+    volumes:
+      - recyclarr:/config
+      - ./recyclarr/recyclarr.yml:/config/recyclarr.yml # Pass recyclarr config file
+
+  # flaresolverr: cloudflare captcha bypasser
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    cap_drop: [all]
+    security_opt: [no-new-privileges:true]
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+
+  # homarr: home page
+  homarr:
+    image: ghcr.io/ajnart/homarr:latest
+    container_name: homarr
+    restart: unless-stopped
+    networks: [globalNetwork]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - homarr:/app/data/configs
+      - homarr:/app/public/icons
+      - homarr:/data
+    ports:
+      - ${HOMARR_PORT}:${HOMARR_PORT} # Homarr WebUI port
+
   # thelounge: irc client
   thelounge:
     image: lscr.io/linuxserver/thelounge:latest
@@ -269,9 +348,10 @@ services:
     image: codefaux/deemix-for-lidarr:latest
     container_name: deemix
     restart: unless-stopped
-    networks: [downloadNetwork]
-    ports:
-      - ${DEEMIX_PORT}:${DEEMIX_PORT}
+    network_mode: service:gluetun
+    depends_on:
+      gluetun:
+        condition: service_healthy
     environment:
       - TZ=${GLOBAL_TZ}
       - PUID=${GLOBAL_PUID}
@@ -286,7 +366,14 @@ services:
     image: ghcr.io/ad-on-is/lidarr-deemix:latest
     container_name: lidarr-deemix
     restart: unless-stopped
-    networks: [downloadNetwork]
+    depends_on:
+      gluetun:
+        condition: service_healthy
+      lidarr:
+        condition: service_started
+      deemix:
+        condition: service_started
+    network_mode: service:gluetun
     environment:
       - DEEMIX_ARL=${DEEMIX_ARL}
 
@@ -297,12 +384,18 @@ volumes:
   nextcloud_aio_mastercontainer:
     external: true
     name: nextcloud_aio_mastercontainer
-  homarr:
+  gluetun:
     external: true
-    name: homarr-volume
-  qbittorrentvpn:
+    name: gluetun-volume
+  qbittorrent:
     external: true
-    name: qbittorrentvpn-volume
+    name: qbittorrent-volume
+  seedboxapi:
+    external: true
+    name: seedboxapi-volume
+  jellyfin:
+    external: true
+    name: jellyfin-volume
   radarr:
     external: true
     name: radarr-volume
@@ -318,9 +411,9 @@ volumes:
   recyclarr:
     external: true
     name: recyclarr-volume
-  jellyfin:
+  homarr:
     external: true
-    name: jellyfin-volume
+    name: homarr-volume
   thelounge:
     external: true
     name: thelounge-volume
