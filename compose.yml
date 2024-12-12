@@ -6,57 +6,15 @@ services:
     restart: unless-stopped
     network_mode: host # Docker requires network_mode be set to host in order to access the IPv6 public address
     environment:
-      - NEXTCLOUD_PUBLISHED_URL=${NEXTCLOUD_PUBLISHED_URL}
-      - JELLYFIN_PUBLISHED_URL=${JELLYFIN_PUBLISHED_URL}
-      - HOMARR_PUBLISHED_URL=${HOMARR_PUBLISHED_URL}
-      - JELLYFIN_PORT=${JELLYFIN_HTTP_PORT}
-      - HOMARR_PORT=${HOMARR_PORT}
-      - THELOUNGE_PORT=${THELOUNGE_PORT}
-      - THELOUNGE_PUBLISHED_URL=${THELOUNGE_PUBLISHED_URL}
+      - JELLYFIN_PUBLISHED_URL=${JELLYFIN_PUBLISHED_URL} # Published public Jellyfin URL
+      - JELLYFIN_PORT=${JELLYFIN_HTTP_PORT} # Internal jellyfin HTTP port, default is normally 8096
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./Caddyfile:/etc/caddy/Caddyfile # Local Caddyfile to map
       - caddy:/certs
       - caddy:/config
       - caddy:/data
       - caddy:/srv
 
-  # nextcloud: file hosting and drive
-  nextcloud-aio-mastercontainer:
-    image: nextcloud/all-in-one:latest
-    container_name: nextcloud-aio-mastercontainer
-    restart: unless-stopped
-    networks: [globalNetwork]
-    environment:
-      - APACHE_PORT=11000
-      - APACHE_IP_BINDING=127.0.0.1
-      - NEXTCLOUD_DATADIR=${NEXTCLOUD_DIRECTORY}
-      - NEXTCLOUD_UPLOAD_LIMIT=100G
-      - NEXTCLOUD_MAX_TIME=12000
-      - NEXTCLOUD_MEMORY_LIMIT=8096M # Memory limit, lower if a problem
-      - NEXTCLOUD_ENABLE_DRI_DEVICE=true # Disable if /dev/dri doesn't exist
-    volumes:
-      - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
-      - ${STORAGE_DIRECTORY}/nextcloud:/data
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - 8080:8080 # NextCloud HTTP Port
-      - 8443:8443 # NextCloud HTTPS Port
-
-  # cloudflare-ddns: cloudflare dns updater
-  cloudflare-ddns:
-    image: favonia/cloudflare-ddns:latest
-    container_name: cloudflare-ddns
-    restart: always
-    network_mode: host
-    read_only: true
-    cap_drop: [all]
-    security_opt: [no-new-privileges:true]
-    environment:
-      - CF_API_TOKEN=${CF_API_TOKEN}
-      - DOMAINS=${CF_DOMAINS}
-      - PROXIED=${CF_PROXIED}
-
-  # gluetun: vpn client (protonvpn)
   gluetun:
     image: qmcgaw/gluetun:latest
     container_name: gluetun
@@ -81,12 +39,6 @@ services:
       - gluetun:/gluetun
     ports:
       - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT} # qBittorrent WebUI
-      - ${SONARR_PORT}:${SONARR_PORT} # Sonarr WebUI
-      - ${RADARR_PORT}:${RADARR_PORT} # Radarr WebUI
-      - ${LIDARR_PORT}:${LIDARR_PORT} # Lidarr WebUI
-      - ${DEEMIX_PORT}:${DEEMIX_PORT} # Deemix WebUI
-      - ${PROWLARR_PORT}:${PROWLARR_PORT} # Prowlarr WebUI
-      - ${FLARESOLVERR_PORT}:${FLARESOLVERR_PORT} # Flaresolverr API
       - 8000:8000 # Gluetun
 
   # qbittorrent: bittorrent client
@@ -110,7 +62,7 @@ services:
       - qbittorrent:/config
       - ${STORAGE_DIRECTORY}:/storage
 
-  # qbittorrent-port-forwarder: automatic vpn port forwarding mapping for qbittorrent
+  # qbittorrent-natmap: automatically set qbittorrent ports to match gluetun
   qbittorrent-natmap:
     image: ghcr.io/soxfor/qbittorrent-natmap:latest
     container_name: qbittorrent-natmap
@@ -130,6 +82,42 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  # jellyfin: media client for tv/movies
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    networks: [globalNetwork]
+    volumes:
+      - jellyfin:/config
+      - ${MEDIALIBRARY_DIRECTORY}:/data # Media library folder, for my structure it is /mnt/md0p1/medialibrary
+      - /dev/dri:/dev/dri # Remove if /dev/dri doesn't exist or
+    ports:
+      - ${JELLYFIN_HTTP_PORT}:${JELLYFIN_HTTP_PORT} # Jellyfin WebUI port, default is normally 8096
+      - ${JELLYFIN_HTTPS_PORT}:${JELLYFIN_HTTPS_PORT} # Jellyfin HTTPS WebUI port, default is normally 8920
+      - ${JELLYFIN_DLNA_PORT}:${JELLYFIN_DLNA_PORT}/udp # Jellyfin DLNA port, default is normally 1900
+      - ${JELLYFIN_AUTODISCOVERY_PORT}:${JELLYFIN_AUTODISCOVERY_PORT}/udp # Jellyfin Client AutoDiscovery port, default is normally 7359
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+      - DOCKER_MODS=ghcr.io/jumoog/intro-skipper # Allows adding the "skip intro" button to the web UI. Remove if you don't use this plugin
+
+  # cloudflare-ddns: cloudflare dns updater
+  cloudflare-ddns:
+    image: favonia/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
+    restart: always
+    network_mode: host
+    read_only: true
+    cap_drop: [all]
+    security_opt: [no-new-privileges:true]
+    environment:
+      - CF_API_TOKEN=${CF_API_TOKEN}
+      - DOMAINS=${CF_DOMAINS}
+      - PROXIED=${CF_PROXIED}
+
   # seedboxapi: automatically set seedbox api for trackers (MAM)
   # If you are not using myanonamouse, you may safely remove this container
   seedboxapi:
@@ -144,291 +132,33 @@ services:
     environment:
       - DEBUG=1
       - interval=1 # Check every minute
-      - mam_id=${MAM_ID}
+      - mam_id=${MAM_ID} # MyAnonAmouse Session ID
     volumes:
       - seedboxapi:/config
-
-  # jellyfin: media client
-  jellyfin:
-    image: lscr.io/linuxserver/jellyfin:latest
-    container_name: jellyfin
-    restart: unless-stopped
-    runtime: nvidia
-    networks: [globalNetwork]
-    volumes:
-      - jellyfin:/config
-      - ${MEDIALIBRARY_DIRECTORY}:/data # Point this to your final media library folder
-      - /dev/dri:/dev/dri # Remove if /dev/dri doesn't exist
-    ports:
-      - ${JELLYFIN_HTTP_PORT}:${JELLYFIN_HTTP_PORT} # Jellyfin WebUI port
-      - ${JELLYFIN_HTTPS_PORT}:${JELLYFIN_HTTPS_PORT} # Jellyfin HTTPS WebUI port
-      - ${JELLYFIN_DLNA_PORT}:${JELLYFIN_DLNA_PORT}/udp # Jellyfin DLNA port
-      - ${JELLYFIN_AUTODISCOVERY_PORT}:${JELLYFIN_AUTODISCOVERY_PORT}/udp # Jellyfin Client AutoDiscovery port
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-      - DOCKER_MODS=ghcr.io/jumoog/intro-skipper # Allows adding the "skip intro" button to the web UI. Remove if you don't use this plugin
-      - NVIDIA_VISIBLE_DEVICES=all # Remove this and the following lines if you do not want NVIDIA support
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-
-  # radarr: pvr for movies
-  radarr:
-    image: lscr.io/linuxserver/radarr:latest
-    container_name: radarr
-    restart: unless-stopped
-    network_mode: service:gluetun
-    depends_on:
-      qbittorrent:
-        condition: service_started
-      gluetun:
-        condition: service_healthy
-      flaresolverr:
-        condition: service_started
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-    volumes:
-      - radarr:/config
-      - ${DOWNLOAD_DIRECTORY}:/downloads
-      - ${STORAGE_DIRECTORY}:/storage
-
-  # sonarr: pvr for tv shows/anime
-  sonarr:
-    image: lscr.io/linuxserver/sonarr:latest
-    container_name: sonarr
-    restart: unless-stopped
-    network_mode: service:gluetun
-    depends_on:
-      qbittorrent:
-        condition: service_started
-      gluetun:
-        condition: service_healthy
-      flaresolverr:
-        condition: service_started
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-    volumes:
-      - sonarr:/config
-      - ${DOWNLOAD_DIRECTORY}:/downloads
-      - ${STORAGE_DIRECTORY}:/storage
-
-  # lidarr: pvr for music
-  lidarr:
-    image: ghcr.io/hotio/lidarr:pr-plugins
-    container_name: lidarr
-    restart: unless-stopped
-    network_mode: service:gluetun
-    depends_on:
-      qbittorrent:
-        condition: service_started
-      gluetun:
-        condition: service_healthy
-      flaresolverr:
-        condition: service_started
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-    volumes:
-      - lidarr:/config
-      - ${DOWNLOAD_DIRECTORY}:/downloads
-      - ${STORAGE_DIRECTORY}:/storage
-
-  # prowlarr: pvr indexer
-  prowlarr:
-    image: lscr.io/linuxserver/prowlarr:latest
-    container_name: prowlarr
-    restart: unless-stopped
-    network_mode: service:gluetun
-    depends_on:
-      qbittorrent:
-        condition: service_started
-      gluetun:
-        condition: service_healthy
-      radarr:
-        condition: service_started
-      sonarr:
-        condition: service_started
-      flaresolverr:
-        condition: service_started
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-    volumes:
-      - prowlarr:/config
-      - ${DOWNLOAD_DIRECTORY}:/downloads
-      - ${STORAGE_DIRECTORY}:/storage
-
-  # recyclarr: 'arr config manager
-  recyclarr:
-    image: ghcr.io/recyclarr/recyclarr:latest
-    container_name: recyclarr
-    restart: unless-stopped
-    network_mode: service:gluetun
-    depends_on:
-      radarr:
-        condition: service_started
-      sonarr:
-        condition: service_started
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-      - SONARR_API_KEY=${SONARR_API_KEY}
-      - RADARR_API_KEY=${RADARR_API_KEY}
-    volumes:
-      - recyclarr:/config
-      - ./recyclarr/recyclarr.yml:/config/recyclarr.yml # Pass recyclarr config file
-
-  # flaresolverr: cloudflare captcha bypasser
-  flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    container_name: flaresolverr
-    restart: unless-stopped
-    network_mode: service:gluetun
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    cap_drop: [all]
-    security_opt: [no-new-privileges:true]
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-
-  # homarr: home page
-  homarr:
-    image: ghcr.io/ajnart/homarr:latest
-    container_name: homarr
-    restart: unless-stopped
-    networks: [globalNetwork]
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - homarr:/app/data/configs
-      - homarr:/app/public/icons
-      - homarr:/data
-    ports:
-      - ${HOMARR_PORT}:${HOMARR_PORT} # Homarr WebUI port
-
-  # thelounge: irc client
-  thelounge:
-    image: lscr.io/linuxserver/thelounge:latest
-    container_name: thelounge
-    restart: unless-stopped
-    networks: [globalNetwork]
-    ports:
-      - ${THELOUNGE_PORT}:${THELOUNGE_PORT}
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-    volumes:
-      - thelounge:/config
-
-  # deemix: music downloader
-  deemix:
-    image: codefaux/deemix-for-lidarr:latest
-    container_name: deemix
-    restart: unless-stopped
-    network_mode: service:gluetun
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    environment:
-      - TZ=${GLOBAL_TZ}
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
-    volumes:
-      - ${DOWNLOAD_DIRECTORY}:/downloads
-      - deemix:/deemix-gui/config
-
-  # lidarr-deemix: lidarr deemix enrichment
-  lidarr-deemix:
-    image: ghcr.io/ad-on-is/lidarr-deemix:latest
-    container_name: lidarr-deemix
-    restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_healthy
-      lidarr:
-        condition: service_started
-      deemix:
-        condition: service_started
-    network_mode: service:gluetun
-    environment:
-      - DEEMIX_ARL=${DEEMIX_ARL}
 
 volumes:
   caddy:
     external: true
     name: caddy-volume
-  nextcloud_aio_mastercontainer:
-    external: true
-    name: nextcloud_aio_mastercontainer
   gluetun:
     external: true
     name: gluetun-volume
   qbittorrent:
     external: true
     name: qbittorrent-volume
-  seedboxapi:
-    external: true
-    name: seedboxapi-volume
   jellyfin:
     external: true
     name: jellyfin-volume
-  radarr:
+  seedboxapi:
     external: true
-    name: radarr-volume
-  sonarr:
-    external: true
-    name: sonarr-volume
-  lidarr:
-    external: true
-    name: lidarr-volume
-  prowlarr:
-    external: true
-    name: prowlarr-volume
-  recyclarr:
-    external: true
-    name: recyclarr-volume
-  homarr:
-    external: true
-    name: homarr-volume
-  thelounge:
-    external: true
-    name: thelounge-volume
-  deemix:
-    external: true
-    name: deemix-volume
+    name: seedboxapi-volume
 
 networks:
   globalNetwork:
     external: true
     driver: bridge
-    name: global-network
+    name: download-network
     enable_ipv6: false
-
   downloadNetwork:
     external: true
     driver: bridge
