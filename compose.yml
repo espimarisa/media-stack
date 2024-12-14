@@ -113,7 +113,7 @@ services:
     container_name: navidrome
     restart: unless-stopped
     networks: [globalNetwork]
-    #user: ${GLOBAL_PGID}:${GLOBAL_PUID}
+    # user: ${GLOBAL_PGID}:${GLOBAL_PUID}
     ports:
       - ${NAVIDROME_PORT}:${NAVIDROME_PORT} # navidrome webui port, defaults to 4533
     volumes:
@@ -133,6 +133,19 @@ services:
       - CF_API_TOKEN=${CF_API_TOKEN}
       - DOMAINS=${CF_DOMAINS}
       - PROXIED=${CF_PROXIED}
+
+  # deemix: deemix downloader
+  deemix:
+    image: ghcr.io/bambanah/deemix:v4.2.10
+    container_name: deemix
+    networks: [downloadNetwork]
+    environment:
+      - DEEMIX_SINGLE_USER=true # server-side config
+    volumes:
+      - deemix:/config
+      - ${MEDIALIBRARY_DIRECTORY}/music
+    ports:
+      - ${DEEMIX_PORT}:${DEEMIX_PORT} # deemix webui port, 6595 is the default
 
   # seedboxapi: automatically set seedbox api for trackers (MAM)
   # If you are not using myanonamouse, you may safely remove this container
@@ -168,6 +181,9 @@ volumes:
   navidrome:
     external: true
     name: navidrome-volume
+  deemix:
+    external: true
+    name: deemix-volume
   seedboxapi:
     external: true
     name: seedboxapi-volume
