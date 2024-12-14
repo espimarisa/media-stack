@@ -141,13 +141,13 @@ services:
     networks: [downloadNetwork]
     environment:
       - DEEMIX_SINGLE_USER=true # server-side config
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
     volumes:
       - deemix:/config
       - ${MEDIALIBRARY_DIRECTORY}/music:/downloads
     ports:
       - ${DEEMIX_PORT}:${DEEMIX_PORT} # deemix webui port, 6595 is the default
-      - PUID=${GLOBAL_PUID}
-      - PGID=${GLOBAL_PGID}
 
   # seedboxapi: automatically set seedbox api for trackers (MAM)
   # If you are not using myanonamouse, you may safely remove this container
