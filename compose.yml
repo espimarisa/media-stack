@@ -143,7 +143,7 @@ services:
       - DEEMIX_SINGLE_USER=true # server-side config
     volumes:
       - deemix:/config
-      - ${MEDIALIBRARY_DIRECTORY}/music
+      - ${MEDIALIBRARY_DIRECTORY}/music:/downloads
     ports:
       - ${DEEMIX_PORT}:${DEEMIX_PORT} # deemix webui port, 6595 is the default
 
