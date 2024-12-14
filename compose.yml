@@ -8,6 +8,8 @@ services:
     environment:
       - JELLYFIN_PUBLISHED_URL=${JELLYFIN_PUBLISHED_URL} # Published public Jellyfin URL
       - JELLYFIN_PORT=${JELLYFIN_HTTP_PORT} # Internal jellyfin HTTP port, default is normally 8096
+      - NAVIDROME_PUBLISHED_URL=${NAVIDROME_PUBLISHED_URL} # Published public NaviDrome URL
+      - NAVIDROME_PORT=${NAVIDROME_PORT} # Internal NaviDrome HTTP port, default is normally 4533
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile # Local Caddyfile to map
       - caddy:/certs
@@ -111,7 +113,7 @@ services:
     container_name: navidrome
     restart: unless-stopped
     networks: [globalNetwork]
-    user: ${GLOBAL_PGID}:${GLOBAL_PUID}
+    #user: ${GLOBAL_PGID}:${GLOBAL_PUID}
     ports:
       - ${NAVIDROME_PORT}:${NAVIDROME_PORT} # navidrome webui port, defaults to 4533
     volumes:

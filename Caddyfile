@@ -2,3 +2,7 @@
 {$JELLYFIN_PUBLISHED_URL}:443 {
   reverse_proxy localhost:{$JELLYFIN_PORT}
 }
+
+{$NAVIDROME_PUBLISHED_URL}:443 {
+  reverse_proxy localhost:{$NAVIDROME_PORT}
+}
