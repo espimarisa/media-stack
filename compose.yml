@@ -15,6 +15,7 @@ services:
       - caddy:/data
       - caddy:/srv
 
+  # gluetun: vpn
   gluetun:
     image: qmcgaw/gluetun:latest
     container_name: gluetun
@@ -90,7 +91,7 @@ services:
     networks: [globalNetwork]
     volumes:
       - jellyfin:/config
-      - ${MEDIALIBRARY_DIRECTORY}:/data # Media library folder, for my structure it is /mnt/md0p1/medialibrary
+      - ${MEDIALIBRARY_DIRECTORY}:/data # Media library folder, for my structure it is /mnt/md0/medialibrary
       - /dev/dri:/dev/dri # Remove if /dev/dri doesn't exist or
     ports:
       - ${JELLYFIN_HTTP_PORT}:${JELLYFIN_HTTP_PORT} # Jellyfin WebUI port, default is normally 8096
@@ -103,6 +104,19 @@ services:
       - PGID=${GLOBAL_PGID}
       - UMASK=${GLOBAL_UMASK}
       - DOCKER_MODS=ghcr.io/jumoog/intro-skipper # Allows adding the "skip intro" button to the web UI. Remove if you don't use this plugin
+
+  # navidrome: media client for music
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
+    restart: unless-stopped
+    networks: [globalNetwork]
+    user: ${GLOBAL_PGID}:${GLOBAL_PUID}
+    ports:
+      - ${NAVIDROME_PORT}:${NAVIDROME_PORT} # navidrome webui port, defaults to 4533
+    volumes:
+      - navidrome:/data
+      - ${MEDIALIBRARY_DIRECTORY}/music:/music:ro # read-only music directory, i like mediadirectory/music
 
   # cloudflare-ddns: cloudflare dns updater
   cloudflare-ddns:
@@ -149,6 +163,9 @@ volumes:
   jellyfin:
     external: true
     name: jellyfin-volume
+  navidrome:
+    external: true
+    name: navidrome-volume
   seedboxapi:
     external: true
     name: seedboxapi-volume

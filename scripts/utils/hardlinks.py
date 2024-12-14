@@ -39,7 +39,7 @@ allowed_folders = [
 
 # final destination folders
 # be sure they exist and match your file structure
-# mine is hardcoded to be /mnt/md0p1/medialibrary
+# mine is hardcoded to be /mnt/md0/medialibrary
 # which is mapped to /storage/medialibrary inside of docker
 dest_folders = [
   "/storage/medialibrary/anime",
