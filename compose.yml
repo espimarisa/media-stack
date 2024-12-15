@@ -204,7 +204,7 @@ services:
     volumes:
       - ${STORAGE_DIRECTORY}/seafile:/shared # point to where you want to store files with SeaFile
     ports:
-      - "8000:80"
+      - "8025:80"
       - "8040:443"
 
 volumes:
