@@ -16,8 +16,10 @@ wip
 - qbittorrent: bittorrent client
 - qbittorrent-natmap: auto port forwarding
 - jellyfin: media server for anime/tv/movies
+- navidrome: media server for music
 - cloudflare-ddns: keep A/AAAA records up to date
-
+- seafile: file sharing and backups
+- deemix: music downloader
 
 ## license
 
