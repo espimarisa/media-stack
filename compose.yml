@@ -144,7 +144,6 @@ services:
       - DEEMIX_SINGLE_USER=true # server-side config
       - PUID=${GLOBAL_PUID}
       - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
       - TZ=${GLOBAL_TZ}
     volumes:
       - deemix:/config
@@ -160,7 +159,6 @@ services:
     environment:
       - PUID=${GLOBAL_PUID}
       - PGID=${GLOBAL_PGID}
-      - UMASK=${GLOBAL_UMASK}
       - TZ=${GLOBAL_TZ}
     volumes:
       - lidarr:/config
