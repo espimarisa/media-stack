@@ -146,7 +146,7 @@ services:
       - PGID=${GLOBAL_PGID}
       - TZ=${GLOBAL_TZ}
     volumes:
-      - deemix:/config
+      - deemix:/deemix-gui/config
       - ${DOWNLOAD_DIRECTORY}/music:/downloads
     ports:
       - ${DEEMIX_PORT}:${DEEMIX_PORT} # deemix webui port, 6595 is the default
