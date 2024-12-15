@@ -9,6 +9,7 @@ services:
       - JELLYFIN_PUBLISHED_URL=${JELLYFIN_PUBLISHED_URL} # Published public Jellyfin URL
       - JELLYFIN_PORT=${JELLYFIN_HTTP_PORT} # Internal jellyfin HTTP port, default is normally 8096
       - NAVIDROME_PUBLISHED_URL=${NAVIDROME_PUBLISHED_URL} # Published public NaviDrome URL
+      - SEAFILE_PUBLISHED_URL=${SEAFILE_PUBLISHED_URL} # Published public SeaFile URL
       - NAVIDROME_PORT=${NAVIDROME_PORT} # Internal NaviDrome HTTP port, default is normally 4533
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile # Local Caddyfile to map
@@ -172,7 +173,7 @@ services:
     image: mariadb:10.11
     container_name: seafile-mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=${SEAFDILE_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${SEAFILE_DB_PASSWORD}
       - MYSQL_LOG_CONSOLE=true
       - MARIADB_AUTO_UPGRADE=1
     volumes:
@@ -195,7 +196,7 @@ services:
     environment:
       - DB_HOST=db # seafile db host
       - DB_ROOT_PASSWD=${SEAFDILE_DB_PASSWORD}  # seafile-db password
-      - TIME_ZONE=${GLOBAL_TIMEZONE}
+      - TIME_ZONE=${GLOBAL_TZ}
       - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL} # seafile admin user
       - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD}     # seafile admin password
       - SEAFILE_SERVER_LETSENCRYPT=true # use https
