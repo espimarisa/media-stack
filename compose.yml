@@ -199,13 +199,13 @@ services:
       - TIME_ZONE=${GLOBAL_TZ}
       - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL} # seafile admin user
       - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD}     # seafile admin password
-      - SEAFILE_SERVER_LETSENCRYPT=true # use https
+      - SEAFILE_SERVER_LETSENCRYPT=false # use https
       - SEAFILE_SERVER_HOSTNAME=${SEAFILE_PUBLISHED_URL} # specifies host name if https is enabled
     volumes:
       - ${STORAGE_DIRECTORY}/seafile:/shared # point to where you want to store files with SeaFile
     ports:
       - "8025:80"
-      - "8040:443"
+     # - "8040:443"
 
 volumes:
   caddy:
