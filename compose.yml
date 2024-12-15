@@ -195,7 +195,7 @@ services:
     networks: [globalNetwork]
     environment:
       - DB_HOST=db # seafile db host
-      - DB_ROOT_PASSWD=${SEAFDILE_DB_PASSWORD}  # seafile-db password
+      - DB_ROOT_PASSWD=${SEAFILE_DB_PASSWORD}  # seafile-db password
       - TIME_ZONE=${GLOBAL_TZ}
       - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL} # seafile admin user
       - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD}     # seafile admin password
