@@ -124,7 +124,7 @@ services:
   cloudflare-ddns:
     image: favonia/cloudflare-ddns:latest
     container_name: cloudflare-ddns
-    restart: always
+    restart: unless-stopped
     network_mode: host
     read_only: true
     cap_drop: [all]
@@ -136,18 +136,38 @@ services:
 
   # deemix: deemix downloader
   deemix:
-    image: ghcr.io/bambanah/deemix:v4.2.10
+    image: codefaux/deemix-for-lidarr
     container_name: deemix
     networks: [downloadNetwork]
+    restart: unless-stopped
     environment:
       - DEEMIX_SINGLE_USER=true # server-side config
       - PUID=${GLOBAL_PUID}
       - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+      - TZ=${GLOBAL_TZ}
     volumes:
       - deemix:/config
-      - ${MEDIALIBRARY_DIRECTORY}/music:/downloads
+      - ${DOWNLOAD_DIRECTORY}/music:/downloads
     ports:
       - ${DEEMIX_PORT}:${DEEMIX_PORT} # deemix webui port, 6595 is the default
+
+  # lidarr: music pvr
+  lidarr:
+    image: ghcr.io/hotio/lidarr:pr-plugins
+    container_name: lidarr
+    networks: [downloadNetwork]
+    environment:
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+      - TZ=${GLOBAL_TZ}
+    volumes:
+      - lidarr:/config
+      - ${DOWNLOAD_DIRECTORY}/music:/downloads
+      - ${STORAGE_DIRECTORY}:/storage
+    ports:
+      - 8686:8686
 
   # seedboxapi: automatically set seedbox api for trackers (MAM)
   # If you are not using myanonamouse, you may safely remove this container
@@ -186,6 +206,9 @@ volumes:
   deemix:
     external: true
     name: deemix-volume
+  lidarr:
+    external: true
+    name: lidarr-volume
   seedboxapi:
     external: true
     name: seedboxapi-volume

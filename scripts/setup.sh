@@ -8,6 +8,7 @@ docker volume create gluetun-volume
 docker volume create jellyfin-volume
 docker volume create navidrome-volume
 docker volume create deemix-volume
+docker volume create lidarr-volume
 
 # Creates network
 docker network create global-network
