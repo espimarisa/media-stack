@@ -9,7 +9,6 @@ services:
       - JELLYFIN_PUBLISHED_URL=${JELLYFIN_PUBLISHED_URL} # Published public Jellyfin URL
       - JELLYFIN_PORT=${JELLYFIN_HTTP_PORT} # Internal jellyfin HTTP port, default is normally 8096
       - NAVIDROME_PUBLISHED_URL=${NAVIDROME_PUBLISHED_URL} # Published public NaviDrome URL
-      - SEAFILE_PUBLISHED_URL=${SEAFILE_PUBLISHED_URL} # Published public SeaFile URL
       - NAVIDROME_PORT=${NAVIDROME_PORT} # Internal NaviDrome HTTP port, default is normally 4533
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile # Local Caddyfile to map
@@ -167,45 +166,6 @@ services:
       - mam_id=${MAM_ID} # MyAnonAmouse Session ID
     volumes:
       - seedboxapi:/config
-
-  # seafile-db: db for seafile
-  seafile-db:
-    image: mariadb:10.11
-    container_name: seafile-mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=${SEAFILE_DB_PASSWORD}
-      - MYSQL_LOG_CONSOLE=true
-      - MARIADB_AUTO_UPGRADE=1
-    volumes:
-      - ${STORAGE_DIRECTORY}/seafile-db:/var/lib/mysql  # Required, specifies the path to MySQL data persistent store.
-    networks: [globalNetwork]
-
-  # memcached: memory caching for seafile
-  memcached:
-    image: memcached:1.6.18
-    container_name: seafile-memcached
-    entrypoint: memcached -m 256
-    networks: [globalNetwork]
-
-  # seafile: file sharing/drive replacement
-  seafile:
-    image: seafileltd/seafile-mc:11.0-latest
-    container_name: seafile
-    depends_on: [seafile-db, memcached]
-    networks: [globalNetwork]
-    environment:
-      - DB_HOST=db # seafile db host
-      - DB_ROOT_PASSWD=${SEAFILE_DB_PASSWORD}  # seafile-db password
-      - TIME_ZONE=${GLOBAL_TZ}
-      - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL} # seafile admin user
-      - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD}     # seafile admin password
-      - SEAFILE_SERVER_LETSENCRYPT=false # use https
-      - SEAFILE_SERVER_HOSTNAME=${SEAFILE_PUBLISHED_URL} # specifies host name if https is enabled
-    volumes:
-      - ${STORAGE_DIRECTORY}/seafile:/shared # point to where you want to store files with SeaFile
-    ports:
-      - "8025:80"
-     # - "8040:443"
 
 volumes:
   caddy:
