@@ -97,10 +97,11 @@ services:
     container_name: jellyfin
     restart: unless-stopped
     networks: [externalNetwork]
+    devices:
+      - /dev/dri:/dev/dri # Remove if /dev/dri doesn't exist or
     volumes:
       - jellyfin:/config
       - ${MEDIALIBRARY_DIRECTORY}:/data # Media library folder, for my structure it is /mnt/md0/medialibrary
-      - /dev/dri:/dev/dri # Remove if /dev/dri doesn't exist or
     ports:
       - ${JELLYFIN_HTTP_PORT}:${JELLYFIN_HTTP_PORT} # Jellyfin WebUI port, default is normally 8096
       - ${JELLYFIN_HTTPS_PORT}:${JELLYFIN_HTTPS_PORT} # Jellyfin HTTPS WebUI port, default is normally 8920
