@@ -42,6 +42,10 @@ services:
       - gluetun:/gluetun
     ports:
       - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT} # qBittorrent WebUI
+      - ${SONARR_PORT}:${SONARR_PORT} # Sonarr WebUI
+      - ${RADARR_PORT}:${RADARR_PORT} # Radarr WebUI
+      - ${LIDARR_PORT}:${LIDARR_PORT} # Lidarr WebUI
+      - ${DEEMIX_PORT}:${DEEMIX_PORT} # Deemix WebUI
       - 8000:8000 # Gluetun
 
   # qbittorrent: bittorrent client
@@ -137,7 +141,7 @@ services:
   deemix:
     image: codefaux/deemix-for-lidarr
     container_name: deemix
-    networks: [externalNetwork]
+    network_mode: service:gluetun
     restart: unless-stopped
     environment:
       - DEEMIX_SINGLE_USER=true # Only require one server-side config
@@ -147,14 +151,12 @@ services:
     volumes:
       - deemix:/deemix-gui/config
       - ${DOWNLOAD_DIRECTORY}/music:/downloads
-    ports:
-      - ${DEEMIX_PORT}:${DEEMIX_PORT} # deemix webui port, 6595 is the default
 
   # lidarr: music pvr
   lidarr:
     image: ghcr.io/hotio/lidarr:pr-plugins
     container_name: lidarr
-    networks: [externalNetwork]
+    network_mode: service:gluetun
     environment:
       - PUID=${GLOBAL_PUID}
       - PGID=${GLOBAL_PGID}
@@ -163,15 +165,13 @@ services:
       - lidarr:/config
       - ${DOWNLOAD_DIRECTORY}/music:/downloads
       - ${STORAGE_DIRECTORY}:/storage
-    ports:
-      - ${LIDARR_PORT}:${LIDARR_PORT}
 
   # radarr: pvr for movies
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     restart: unless-stopped
-    networks: [externalNetwork]
+    network_mode: service:gluetun
     depends_on:
       qbittorrent:
         condition: service_started
@@ -192,7 +192,7 @@ services:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     restart: unless-stopped
-    networks: [externalNetwork]
+    network_mode: service:gluetun
     depends_on:
       qbittorrent:
         condition: service_started
@@ -213,7 +213,7 @@ services:
   seedboxapi:
     image: myanonamouse/seedboxapi:latest
     container_name: seedboxapi
-    networks: [externalNetwork]
+    network_mode: service:gluetun
     depends_on:
       qbittorrent:
         condition: service_started
