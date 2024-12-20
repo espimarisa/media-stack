@@ -46,6 +46,8 @@ services:
       - ${RADARR_PORT}:${RADARR_PORT} # Radarr WebUI
       - ${LIDARR_PORT}:${LIDARR_PORT} # Lidarr WebUI
       - ${DEEMIX_PORT}:${DEEMIX_PORT} # Deemix WebUI
+      - ${PROWLARR_PORT}:${PROWLARR_PORT} # Prowlarr WebUI
+      - ${FLARESOLVERR_PORT}:${FLARESOLVERR_PORT} # Flaresolverr API
       - 8000:8000 # Gluetun
 
   # qbittorrent: bittorrent client
@@ -208,6 +210,50 @@ services:
       - ${DOWNLOAD_DIRECTORY}:/downloads
       - ${STORAGE_DIRECTORY}:/storage
 
+  # prowlarr: pvr indexer
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    depends_on:
+      qbittorrent:
+        condition: service_started
+      gluetun:
+        condition: service_healthy
+      radarr:
+        condition: service_started
+      sonarr:
+        condition: service_started
+      flaresolverr:
+        condition: service_started
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+    volumes:
+      - prowlarr:/config
+      - ${DOWNLOAD_DIRECTORY}:/downloads
+      - ${STORAGE_DIRECTORY}:/storage
+
+  # flaresolverr: cloudflare captcha bypasser
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    cap_drop: [all]
+    security_opt: [no-new-privileges:true]
+    environment:
+      - TZ=${GLOBAL_TZ}
+      - PUID=${GLOBAL_PUID}
+      - PGID=${GLOBAL_PGID}
+      - UMASK=${GLOBAL_UMASK}
+
   # seedboxapi: automatically set seedbox api for trackers (MAM)
   # If you are not using myanonamouse, you may safely remove this container
   seedboxapi:
@@ -254,6 +300,9 @@ volumes:
   sonarr:
     external: true
     name: sonarr-volume
+  prowlarr:
+    external: true
+    name: prowlarr-volume
   seedboxapi:
     external: true
     name: seedboxapi-volume

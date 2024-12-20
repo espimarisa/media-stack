@@ -23,6 +23,8 @@ wip
 - lidarr: music pvr used in combination with deemix
 - radarr: movies pvr
 - sonarr: tv/anime pvr
+- prowlarr: pvr manager
+- flaresolverr: cloudflare bypasser
 
 ## license
 
