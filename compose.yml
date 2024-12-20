@@ -137,7 +137,7 @@ services:
   deemix:
     image: codefaux/deemix-for-lidarr
     container_name: deemix
-    network_mode: service:gluetun
+    networks: [externalNetwork]
     restart: unless-stopped
     environment:
       - DEEMIX_SINGLE_USER=true # Only require one server-side config
@@ -154,7 +154,7 @@ services:
   lidarr:
     image: ghcr.io/hotio/lidarr:pr-plugins
     container_name: lidarr
-    network_mode: service:gluetun
+    networks: [externalNetwork]
     environment:
       - PUID=${GLOBAL_PUID}
       - PGID=${GLOBAL_PGID}
@@ -171,7 +171,7 @@ services:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     restart: unless-stopped
-    network_mode: service:gluetun
+    networks: [externalNetwork]
     depends_on:
       qbittorrent:
         condition: service_started
@@ -192,7 +192,7 @@ services:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     restart: unless-stopped
-    network_mode: service:gluetun
+    networks: [externalNetwork]
     depends_on:
       qbittorrent:
         condition: service_started
@@ -213,7 +213,7 @@ services:
   seedboxapi:
     image: myanonamouse/seedboxapi:latest
     container_name: seedboxapi
-    network_mode: service:gluetun
+    networks: [externalNetwork]
     depends_on:
       qbittorrent:
         condition: service_started
