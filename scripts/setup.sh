@@ -12,6 +12,7 @@ docker volume create lidarr-volume
 docker volume create radarr-volume
 docker volume create sonarr-volume
 docker volume create prowlarr-volume
+docker volume create seafiledb-volume
 
 # Creates network
 docker network create external-network

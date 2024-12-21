@@ -273,6 +273,45 @@ services:
     volumes:
       - seedboxapi:/config
 
+  # seafile db: persistent db for seafile
+  seafile-db:
+    image: mariadb:10.11
+    container_name: seafile-mysql
+    networks: [externalNetwork]
+    environment:
+      - MYSQL_ROOT_PASSWORD=db_dev
+      - MYSQL_LOG_CONSOLE=true
+      - MARIADB_AUTO_UPGRADE=1
+    volumes:
+      - seafile-db:/var/lib/mysql
+
+  # memcached: memory cache for seafile
+  memcached:
+    image: memcached:1.6.18
+    container_name: seafile-memcached
+    entrypoint: memcached -m 256
+    networks: [externalNetwork]
+
+  # seafile: file sync/backup/sharing
+  seafile:
+    image: seafileltd/seafile-mc:10.0-latest
+    container_name: seafile
+    depends_on: [seafile-db, memcached]
+    networks: [externalNetwork]
+    ports:
+      - ${SEAFILE_HTTP_PORT}:80
+      - ${SEAFILE_HTTPS_PORT}:443
+    volumes:
+      - ${STORAGE_DIRECTORY}/seafile-data:/shared # SeaFile storage directory
+    environment:
+      - DB_HOST=db
+      - DB_ROOT_PASSWD=db_dev
+      - TIME_ZONE=${GLOBAL_TZ}
+      - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL}
+      - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD}
+      - SEAFILE_SERVER_LETSENCRYPT=true
+      - SEAFILE_SERVER_HOSTNAME=${SEAFILE_SERVER_HOSTNAME}
+
 volumes:
   caddy:
     external: true
@@ -307,6 +346,9 @@ volumes:
   seedboxapi:
     external: true
     name: seedboxapi-volume
+  seafile-db:
+    external: true
+    name: seafiledb-volume
 
 networks:
   externalNetwork:
