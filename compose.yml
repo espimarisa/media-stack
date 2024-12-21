@@ -10,6 +10,7 @@ services:
       - JELLYFIN_PORT=${JELLYFIN_HTTP_PORT} # Internal jellyfin HTTP port, default is normally 8096
       - NAVIDROME_PUBLISHED_URL=${NAVIDROME_PUBLISHED_URL} # Published public NaviDrome URL
       - NAVIDROME_PORT=${NAVIDROME_PORT} # Internal NaviDrome HTTP port, default is normally 4533
+      - NEXTCLOUD_PUBLISHED_URL=${NEXTCLOUD_PUBLISHED_URL} # Published public NextCloud URL
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile # Local Caddyfile to map
       - caddy:/certs
