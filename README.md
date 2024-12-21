@@ -13,6 +13,7 @@ wip
 ## services
 
 - caddy: reverse proxying
+- nextcloud: file syncing/backups
 - gluetun: vpn for torrenting
 - qbittorrent: bittorrent client
 - qbittorrent-natmap: auto port forwarding

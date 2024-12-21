@@ -17,6 +17,28 @@ services:
       - caddy:/data
       - caddy:/srv
 
+  # nextcloud: file hosting and drive
+  nextcloud-aio-mastercontainer:
+    image: nextcloud/all-in-one:latest
+    container_name: nextcloud-aio-mastercontainer
+    restart: unless-stopped
+    networks: [globalNetwork]
+    environment:
+      - APACHE_PORT=11000
+      - APACHE_IP_BINDING=127.0.0.1
+      - NEXTCLOUD_DATADIR=${NEXTCLOUD_DIRECTORY}
+      - NEXTCLOUD_UPLOAD_LIMIT=100G
+      - NEXTCLOUD_MAX_TIME=12000
+      - NEXTCLOUD_MEMORY_LIMIT=16384M # Memory limit, lower if a problem
+      - NEXTCLOUD_ENABLE_DRI_DEVICE=true # Disable if /dev/dri doesn't exist
+    volumes:
+      - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
+      - ${NEXTCLOUD_DIRECTORY}:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 8080:8080 # NextCloud HTTP Port
+      - 8443:8443 # NextCloud HTTPS Port
+
   # gluetun: vpn
   gluetun:
     image: qmcgaw/gluetun:latest
@@ -273,47 +295,13 @@ services:
     volumes:
       - seedboxapi:/config
 
-  # seafile db: persistent db for seafile
-  db:
-    image: mariadb:10.11
-    container_name: seafile-mysql
-    networks: [externalNetwork]
-    environment:
-      - MYSQL_ROOT_PASSWORD=${SEAFILE_DB_PASSWORD}
-      - MYSQL_LOG_CONSOLE=true
-      - MARIADB_AUTO_UPGRADE=1
-    volumes:
-      - seafile-db:/var/lib/mysql
-
-  # memcached: memory cache for seafile
-  memcached:
-    image: memcached:1.6.18
-    container_name: seafile-memcached
-    entrypoint: memcached -m 256
-    networks: [externalNetwork]
-
-  # seafile: file sync/backup/sharing
-  seafile:
-    image: seafileltd/seafile-mc:10.0-latest
-    container_name: seafile
-    depends_on: [db, memcached]
-    networks: [externalNetwork]
-    # ports:
-    #- ${SEAFILE_HTTP_PORT}:80
-    volumes:
-      - ${STORAGE_DIRECTORY}/seafile-data:/shared # SeaFile storage directory
-    environment:
-      - DB_HOST=db
-      - DB_ROOT_PASSWD=${SEAFILE_DB_PASSWORD}
-      - TIME_ZONE=${GLOBAL_TZ}
-      - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL}
-      - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD}
-      - SEAFILE_SERVER_LETSENCRYPT=false
-
 volumes:
   caddy:
     external: true
     name: caddy-volume
+  nextcloud_aio_mastercontainer:
+    external: true
+    name: nextcloud_aio_mastercontainer
   gluetun:
     external: true
     name: gluetun-volume
@@ -344,9 +332,6 @@ volumes:
   seedboxapi:
     external: true
     name: seedboxapi-volume
-  seafile-db:
-    external: true
-    name: seafiledb-volume
 
 networks:
   externalNetwork:
